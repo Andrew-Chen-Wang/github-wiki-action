@@ -39,7 +39,7 @@ cd ..
 message=$(git log -1 --format=%B)
 
 echo "Copying files to Wiki"
-rsync -av $WIKI_DIR $TEMP_CLONE_FOLDER/ --exclude $TEMP_CLONE_FOLDER --exclude .git
+rsync -av $WIKI_DIR $TEMP_CLONE_FOLDER/ --exclude $TEMP_CLONE_FOLDER --exclude .git --delete
 echo "Pushing to Wiki"
 cd $TEMP_CLONE_FOLDER
 git add .
