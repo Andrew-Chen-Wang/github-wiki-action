@@ -6,10 +6,13 @@ Repo is WIP!
 Largely inspired by https://github.com/Decathlon/wiki-page-creator-action
 and the [issue that arose from it](https://github.com/Decathlon/wiki-page-creator-action/issues/11),
 this GitHub action tries to update the entire wiki based on all your
-files diffs, additions, and removals.
+files' diffs, additions, and removals.
 
 ---
 ### Usage
+
+You must have a single wiki page available from the beginning.
+It can be blank, but there must be at least one page that exists.
 
 ```yaml
 name: Deploy Wiki
