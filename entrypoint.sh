@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 TEMP_CLONE_FOLDER="temp_wiki_4567129308192764578126573891723968"
 
