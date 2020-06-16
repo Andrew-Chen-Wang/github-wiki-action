@@ -5,19 +5,24 @@ This action updates your repository's wiki
 based on a single directory that matches with
 your Wiki's git.
 
-It is recommended that you still have a Home.md
-or whatever extension you want instead of MD.
+_**It is recommended that you still have a Home.md
+or whatever extension you want instead of MD.**_ This
+is so that GitHub doesn't automatically make a Home.md
+for you again.
 
-Largely inspired by https://github.com/Decathlon/wiki-page-creator-action
+Largely inspired by [wiki-page-creator-action](https://github.com/Decathlon/wiki-page-creator-action)
 and the [issue that arose from it](https://github.com/Decathlon/wiki-page-creator-action/issues/11),
-this GitHub action tries to update the entire wiki based on all your
-files' diffs, additions, and removals.
+this GitHub action tries to update the entire wiki based on a single
+directory. It is not as rich in functionality, but it addresses
+the issue of deleting Wiki pages.
 
 ---
 ### Usage
 
 You must have a single wiki page available from the beginning.
 It can be blank, but there must be at least one page that exists.
+You must also have a directory where all your wiki files will
+be located (the default directory is "wiki/").
 
 ```yaml
 name: Deploy Wiki
