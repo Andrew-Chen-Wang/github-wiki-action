@@ -13,12 +13,12 @@ if [ -z "$ACTION_NAME" ]; then
 fi
 
 if [ -z "$REPO" ]; then
-  echo "REPO ENV is missing. Specify"
+  echo "REPO ENV is missing. Use the one from the README"
   exit 1
 fi
 
 if [ -z "$WIKI_FOLDER" ]; then
-  echo "MD_FOLDER ENV is missing, using the default one"
+  echo "WIKI_FOLDER ENV is missing, using default wiki"
   MD_FOLDER='wiki'
 fi
 
