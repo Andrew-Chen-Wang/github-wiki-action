@@ -35,11 +35,10 @@ jobs:
     - name: Push Wiki Changes
       uses: Andrew-Chen-Wang/github-wiki-action@v1
       env:
-        WIKI_FOLDER: wiki
+        WIKI_DIR: wiki
         GH_PAT: ${{ secrets.GH_PAT }}
-        ACTION_MAIL: ${{ secrets.YOUR_EMAIL }}
-        ACTION_NAME: ${{ github.repository_owner }}
-        REPO: ${{ github.repository }}
+        GH_MAIL: ${{ secrets.YOUR_EMAIL }}
+        GH_NAME: ${{ github.repository_owner }}
 ```
 
 You're going to need a Personal Access Token with the minimal scopes of
