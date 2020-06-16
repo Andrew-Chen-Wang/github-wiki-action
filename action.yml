@@ -3,7 +3,7 @@ author: Andrew Chen Wang <acwangpython@gmail.com>
 description: This Github action publishes Wiki pages <i>with a provided markdown section</i> into your GitHub repository's Wiki.
 runs:
   using: 'docker'
-  image: './'
+  image: './Dockerfile'
 branding:
   icon: tag
   color: blue

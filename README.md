@@ -1,5 +1,5 @@
 # github-wiki-action
-Updates your GitHub wiki by finding diffs.
+Updates your GitHub wiki by using diffs.
 
 Repo is WIP!
 
@@ -28,15 +28,16 @@ on:
 
 jobs:
   deploy-wiki:
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
 
     - name: Push Wiki Changes
-      uses: Andrew-Chen-Wang/github-wiki-action
+      uses: Andrew-Chen-Wang/github-wiki-action@v1
       env:
-        MD_FOLDER: wiki
+        WIKI_FOLDER: wiki
         GH_PAT: ${{ secrets.GH_PAT }}
-        ACTION_MAIL: youremail@mail.com
+        ACTION_MAIL: ${{ secrets.YOUR_EMAIL }}
         ACTION_NAME: ${{ github.repository_owner }}
         REPO: ${{ github.repository }}
 ```

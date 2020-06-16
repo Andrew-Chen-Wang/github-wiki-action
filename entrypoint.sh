@@ -17,7 +17,7 @@ if [ -z "$REPO" ]; then
   exit 1
 fi
 
-if [ -z "$MD_FOLDER" ]; then
+if [ -z "$WIKI_FOLDER" ]; then
   echo "MD_FOLDER ENV is missing, using the default one"
   MD_FOLDER='wiki'
 fi
@@ -37,7 +37,7 @@ cd ..
 # Get commit message
 message=$(git log -1 --format=%B)
 
-rsync -av $MD_FOLDER $TEMP_CLONE_FOLDER/ --exclude $TEMP_CLONE_FOLDER --exclude .git
+rsync -av $WIKI_FOLDER $TEMP_CLONE_FOLDER/ --exclude $TEMP_CLONE_FOLDER --exclude .git
 cd $TEMP_CLONE_FOLDER
 git add .
 git commit -m "$message"
