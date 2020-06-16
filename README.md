@@ -1,7 +1,12 @@
 # github-wiki-action
-Updates your GitHub wiki by using diffs.
+Updates your GitHub wiki by using rsync.
 
-Repo is WIP!
+This action updates your repository's wiki
+based on a single directory that matches with
+your Wiki's git.
+
+It is recommended that you still have a Home.md
+or whatever extension you want instead of MD.
 
 Largely inspired by https://github.com/Decathlon/wiki-page-creator-action
 and the [issue that arose from it](https://github.com/Decathlon/wiki-page-creator-action/issues/11),
@@ -35,7 +40,8 @@ jobs:
     - name: Push Wiki Changes
       uses: Andrew-Chen-Wang/github-wiki-action@v1
       env:
-        WIKI_DIR: wiki
+        # Make sure you have that / at the end. We use rsync 
+        WIKI_DIR: wiki/
         GH_PAT: ${{ secrets.GH_PAT }}
         GH_MAIL: ${{ secrets.YOUR_EMAIL }}
         GH_NAME: ${{ github.repository_owner }}

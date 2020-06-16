@@ -13,13 +13,13 @@ if [ -z "$GH_NAME" ]; then
 fi
 
 if [ -z "$REPO" ]; then
-  echo "REPO ENV is missing. Use the one from the README"
+  echo "REPO ENV is missing. Using the one from the README"
   REPO=$GITHUB_REPOSITORY
 fi
 
 if [ -z "$WIKI_DIR" ]; then
-  echo "WIKI_FOLDER ENV is missing, using default wiki"
-  WIKI_DIR='wiki'
+  echo "WIKI_FOLDER ENV is missing, using default wiki/"
+  WIKI_DIR='wiki/'
 fi
 
 if [ -z "$WIKI_PUSH_MESSAGE" ]; then
