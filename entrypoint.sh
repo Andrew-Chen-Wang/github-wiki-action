@@ -26,6 +26,7 @@ if [ -z "$WIKI_PUSH_MESSAGE" ]; then
   echo "WIKI_PUSH_MESSAGE ENV is missing, using the commit's"
 fi
 
+echo "Configuring..."
 mkdir $TEMP_CLONE_FOLDER
 cd $TEMP_CLONE_FOLDER
 git init
@@ -37,7 +38,9 @@ cd ..
 # Get commit message
 message=$(git log -1 --format=%B)
 
+echo "Copying files to Wiki"
 rsync -av $WIKI_FOLDER $TEMP_CLONE_FOLDER/ --exclude $TEMP_CLONE_FOLDER --exclude .git
+echo "Pushing to Wiki"
 cd $TEMP_CLONE_FOLDER
 git add .
 git commit -m "$message"
