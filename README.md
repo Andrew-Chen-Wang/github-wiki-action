@@ -32,12 +32,12 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Push Wiki Changes
-      uses: aws-actions/configure-aws-credentials@v1
+      uses: Andrew-Chen-Wang/github-wiki-action
       env:
         MD_FOLDER: wiki
         GH_PAT: ${{ secrets.GH_PAT }}
         ACTION_MAIL: youremail@mail.com
-        ACTION_NAME: yourusername
+        ACTION_NAME: ${{ github.repository_owner }}
         REPO: ${{ github.repository }}
 ```
 

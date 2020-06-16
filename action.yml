@@ -1,6 +1,6 @@
 name: GitHub Wiki Action
 author: Andrew Chen Wang <acwangpython@gmail.com>
-description: This Github action <strong>publishes Wiki pages <i>with a provided markdown section</i></strong> into your GitHub repository's Wiki. This action scans the folder, adds its files, and finally publishes them to the wiki.
+description: This Github action publishes Wiki pages <i>with a provided markdown section</i> into your GitHub repository's Wiki.
 runs:
   using: 'docker'
   image: './'
