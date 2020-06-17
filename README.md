@@ -3,14 +3,14 @@ Updates your GitHub wiki by using rsync.
 
 This action updates your repository's wiki
 based on a single directory that matches with
-your Wiki's git.
+your Wiki's git. You can use a Wiki directory
+from any repository you wish.
 
 _**It is recommended that you still have a Home.md
 or whatever extension you want instead of MD.**_ This
 is so that GitHub doesn't automatically make a Home.md
 for you again.
 
-You can use a Wiki directory from any repository you wish.
 Take a look at [action.yml](https://github.com/Andrew-Chen-Wang/github-wiki-action/blob/master/action.yml)
 for all inputs.
 
@@ -55,6 +55,9 @@ You're going to need a Personal Access Token with the minimal scopes of
 [seen here.](https://github.com/settings/tokens/new?scopes=repo&description=wiki%20page%20creator%20token)
 
 ---
+This intended usage was to avoid hosting a private ReadTheDocs
+and instead just use GitHub wiki.
+
 Largely inspired by [wiki-page-creator-action](https://github.com/Decathlon/wiki-page-creator-action)
 and the [issue that arose from it](https://github.com/Decathlon/wiki-page-creator-action/issues/11),
 this GitHub action tries to update the entire wiki based on a single
