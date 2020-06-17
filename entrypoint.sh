@@ -58,9 +58,9 @@ else
     echo "$file" >> ./$TEMP_EXCLUDED_FILE
   done
   rsync -av --delete $WIKI_DIR $TEMP_CLONE_FOLDER/ --exclude .git --exclude-from=$TEMP_EXCLUDED_FILE
-  # Delete files in target repo
+  # Delete files in target repo if it was a reminant.
   for file in $EXCLUDED_FILES; do
-    rm -r $file
+    rm -r $TEMP_CLONE_FOLDER/$file
   done
 fi
 
