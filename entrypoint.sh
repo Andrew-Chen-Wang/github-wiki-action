@@ -2,6 +2,9 @@
 
 TEMP_CLONE_FOLDER="temp_wiki_4567129308192764578126573891723968"
 
+if [ -z "$GH_TOKEN" ]; then
+  echo "GH_TOKEN ENV is missing. Use $\{{ secrets.GITHUB_TOKEN }} or a PAT if your wiki repo is different from your current repo."
+
 if [ -z "$GH_MAIL" ]; then
   echo "GH_MAIL ENV is missing. Use the email for a user that can push to this repository."
   exit 1
@@ -15,13 +18,6 @@ fi
 if [ -z "$REPO" ]; then
   echo "REPO ENV is missing. Using the current one."
   REPO=$GITHUB_REPOSITORY
-else
-  if [ -z "$REPO" != "$GITHUB_REPOSITORY"]; then
-    if [ -z "$GITHUB_TOKEN" == "$GH_PAT"]; then
-        echo "You must use a Personal Access Token to write to the wiki of a different repository."
-        exit 1
-    fi
-  fi
 fi
 
 if [ -z "$WIKI_DIR" ]; then
@@ -37,19 +33,18 @@ git init
 # Setup credentials
 git config user.name $GH_NAME
 git config user.email $GH_MAIL
-credentials=${GH_PAT:-$GITHUB_TOKEN}
 
-git pull https://$credentials@github.com/$REPO.wiki.git
+git pull https://$GH_TOKEN@github.com/$REPO.wiki.git
 cd ..
 
 # Get commit message
 if [ -z "$WIKI_PUSH_MESSAGE" ]; then
-  echo "WIKI_PUSH_MESSAGE ENV is missing, using the commit's."
   message=$(git log -1 --format=%B)
 else
   message=$WIKI_PUSH_MESSAGE
 fi
-echo "Message: $message"
+echo "Message:"
+echo $message
 
 echo "Copying files to Wiki"
 rsync -av $WIKI_DIR $TEMP_CLONE_FOLDER/ --exclude $TEMP_CLONE_FOLDER --exclude .git --delete
@@ -57,5 +52,4 @@ echo "Pushing to Wiki"
 cd $TEMP_CLONE_FOLDER
 git add .
 git commit -m "$message"
-echo https://$credentials@github.com/$REPO.wiki.git
-git push --set-upstream https://$credentials@github.com/$REPO.wiki.git master
+git push --set-upstream https://$GH_TOKEN@github.com/$REPO.wiki.git master

@@ -20,7 +20,9 @@ for all inputs.
 You must have a single wiki page available from the beginning.
 It can be blank, but there must be at least one page that exists.
 You must also have a directory where all your wiki files will
-be located (the default directory is "wiki/").
+be located (the default directory is "wiki/"). To include the
+mandatory homepage, have a file in your wiki/ directory
+called Home.md or with any other extension (e.g. rst).
 
 ```yaml
 name: Deploy Wiki
@@ -46,13 +48,14 @@ jobs:
         # Make sure you have that / at the end. We use rsync 
         # WIKI_DIR's default is wiki/
         WIKI_DIR: wiki/
-        GH_PAT: ${{ secrets.GH_PAT }}
+        GH_PAT: ${{ secrets.GITHUB_TOKEN }}
         GH_MAIL: ${{ secrets.YOUR_EMAIL }}
         GH_NAME: ${{ github.repository_owner }}
 ```
 
-You're going to need a Personal Access Token with the minimal scopes of
-[seen here.](https://github.com/settings/tokens/new?scopes=repo&description=wiki%20page%20creator%20token)
+If you plan on having a different repository host your wiki
+directory, you're going to need a Personal Access Token instead of the `GITHUB_TOKEN`
+with the minimal scopes [seen here.](https://github.com/settings/tokens/new?scopes=repo&description=wiki%20page%20creator%20token)
 
 ---
 This intended usage was to avoid hosting a private ReadTheDocs
