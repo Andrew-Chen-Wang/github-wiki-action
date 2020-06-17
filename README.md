@@ -61,7 +61,7 @@ jobs:
         # Make sure you have that / at the end. We use rsync 
         # WIKI_DIR's default is wiki/
         WIKI_DIR: wiki/
-        GH_PAT: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GH_MAIL: ${{ secrets.YOUR_EMAIL }}
         GH_NAME: ${{ github.repository_owner }}
         EXCLUDED_FILES: "a/ b.md"
