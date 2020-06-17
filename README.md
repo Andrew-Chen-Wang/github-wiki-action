@@ -1,4 +1,4 @@
-# github-wiki-action
+# Andrew-Chen-Wang/github-wiki-action@v1
 Updates your GitHub wiki by using rsync.
 
 This action updates your repository's wiki
@@ -10,11 +10,9 @@ or whatever extension you want instead of MD.**_ This
 is so that GitHub doesn't automatically make a Home.md
 for you again.
 
-Largely inspired by [wiki-page-creator-action](https://github.com/Decathlon/wiki-page-creator-action)
-and the [issue that arose from it](https://github.com/Decathlon/wiki-page-creator-action/issues/11),
-this GitHub action tries to update the entire wiki based on a single
-directory. It is not as rich in functionality, but it addresses
-the issue of deleting Wiki pages.
+You can use a Wiki directory from any repository you wish.
+Take a look at [action.yml](https://github.com/Andrew-Chen-Wang/github-wiki-action/blob/master/action.yml)
+for all inputs.
 
 ---
 ### Usage
@@ -46,6 +44,7 @@ jobs:
       uses: Andrew-Chen-Wang/github-wiki-action@v1
       env:
         # Make sure you have that / at the end. We use rsync 
+        # WIKI_DIR's default is wiki/
         WIKI_DIR: wiki/
         GH_PAT: ${{ secrets.GH_PAT }}
         GH_MAIL: ${{ secrets.YOUR_EMAIL }}
@@ -54,6 +53,14 @@ jobs:
 
 You're going to need a Personal Access Token with the minimal scopes of
 [seen here.](https://github.com/settings/tokens/new?scopes=repo&description=wiki%20page%20creator%20token)
+
+---
+Largely inspired by [wiki-page-creator-action](https://github.com/Decathlon/wiki-page-creator-action)
+and the [issue that arose from it](https://github.com/Decathlon/wiki-page-creator-action/issues/11),
+this GitHub action tries to update the entire wiki based on a single
+directory. It is not as rich in functionality (i.e. the only missing
+functionality is that you can't skip files), but it addresses
+the issue of deleting Wiki pages.
 
 ---
 ### License
