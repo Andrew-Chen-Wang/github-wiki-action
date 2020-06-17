@@ -35,7 +35,7 @@ cd $TEMP_CLONE_FOLDER
 git init
 git config user.name $ACTION_NAME
 git config user.email $GH_MAIL
-git pull https://${GH_PAT}@github.com/$REPO.wiki.git
+git pull https://${GH_PAT:-"$GITHUB_ACTOR:$GITHUB_TOKEN"}@github.com/$REPO.wiki.git
 cd ..
 
 # Get commit message
@@ -55,4 +55,4 @@ echo "Pushing to Wiki"
 cd $TEMP_CLONE_FOLDER
 git add .
 git commit -m "$message"
-git push --set-upstream https://${GH_PAT:-"x-access-token:$GITHUB_TOKEN"}@github.com/$REPO.wiki.git master
+git push --set-upstream https://${GH_PAT:-"$GITHUB_ACTOR:$GITHUB_TOKEN"}@github.com/$REPO.wiki.git master
