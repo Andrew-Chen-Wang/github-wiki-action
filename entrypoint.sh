@@ -58,6 +58,10 @@ else
     echo "$file" >> ./$TEMP_EXCLUDED_FILE
   done
   rsync -av --delete $WIKI_DIR $TEMP_CLONE_FOLDER/ --exclude .git --exclude-from=$TEMP_EXCLUDED_FILE
+  # Delete files in target repo
+  for file in $EXCLUDED_FILES; do
+    rm -r $file
+  done
 fi
 
 echo "Pushing to Wiki"

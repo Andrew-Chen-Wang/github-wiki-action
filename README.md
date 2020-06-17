@@ -50,7 +50,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Push Wiki Changes
-      uses: Andrew-Chen-Wang/github-wiki-action@v1
+      uses: Andrew-Chen-Wang/github-wiki-action@v2
       env:
         # Make sure you have that / at the end. We use rsync 
         # WIKI_DIR's default is wiki/
