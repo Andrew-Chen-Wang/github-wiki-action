@@ -33,9 +33,13 @@ echo "Configuring wiki git..."
 mkdir $TEMP_CLONE_FOLDER
 cd $TEMP_CLONE_FOLDER
 git init
-git config user.name $ACTION_NAME
+
+# Setup credentials
+git config user.name $GH_NAME
 git config user.email $GH_MAIL
-git pull https://${GH_PAT:-"$GITHUB_ACTOR:$GITHUB_TOKEN"}@github.com/$REPO.wiki.git
+credentials="${GH_PAT:-"$GH_NAME:$GITHUB_TOKEN"}"
+
+git pull https://$credentials@github.com/$REPO.wiki.git
 cd ..
 
 # Get commit message
@@ -47,12 +51,11 @@ else
 fi
 echo "Message: $message"
 
-# https://github.com/maxheld83/ghpages/pull/18
-
 echo "Copying files to Wiki"
 rsync -av $WIKI_DIR $TEMP_CLONE_FOLDER/ --exclude $TEMP_CLONE_FOLDER --exclude .git --delete
 echo "Pushing to Wiki"
 cd $TEMP_CLONE_FOLDER
 git add .
 git commit -m "$message"
-git push --set-upstream https://${GH_PAT:-"$GITHUB_ACTOR:$GITHUB_TOKEN"}@github.com/$REPO.wiki.git master
+echo https://$credentials@github.com/$REPO.wiki.git
+git push --set-upstream https://$credentials@github.com/$REPO.wiki.git master
