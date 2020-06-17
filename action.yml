@@ -8,7 +8,7 @@ inputs:
   WIKI_DIR:
     description: 'Directory to rsync files to the wiki.'
     required: true
-    default: 'wiki'
+    default: 'wiki/'
   GH_PAT:
     description: 'The GitHub Personal Access Token for this action to use'
     required: true
