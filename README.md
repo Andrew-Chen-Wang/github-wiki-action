@@ -1,4 +1,4 @@
-# Andrew-Chen-Wang/github-wiki-action@v1.1.0
+# Andrew-Chen-Wang/github-wiki-action@v2
 Updates your GitHub wiki by using rsync.
 
 This action updates your repository's wiki
