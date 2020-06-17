@@ -37,7 +37,7 @@ git init
 # Setup credentials
 git config user.name $GH_NAME
 git config user.email $GH_MAIL
-credentials="${GH_PAT:-"$GH_NAME:$GITHUB_TOKEN"}"
+credentials=${GH_PAT:-$GH_NAME:$GITHUB_TOKEN}
 
 git pull https://$credentials@github.com/$REPO.wiki.git
 cd ..
