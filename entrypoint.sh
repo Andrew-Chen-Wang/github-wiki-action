@@ -1,6 +1,7 @@
 #!/bin/sh
 
-TEMP_CLONE_FOLDER="temp_wiki_4567129308192764578126573891723968"
+TEMP_CLONE_FOLDER="temp_wiki_$GITHUB_SHA"
+TEMP_EXCLUDED_FILE="temp_wiki_excluded_$GITHUB_SHA.txt"
 
 if [ -z "$GH_TOKEN" ]; then
   echo "GH_TOKEN ENV is missing. Use $\{{ secrets.GITHUB_TOKEN }} or a PAT if your wiki repo is different from your current repo."
@@ -47,7 +48,16 @@ echo "Message:"
 echo $message
 
 echo "Copying files to Wiki"
-rsync -av $WIKI_DIR $TEMP_CLONE_FOLDER/ --exclude $TEMP_CLONE_FOLDER --exclude .git --delete
+# Configuring a file to exclude specified files
+if [ ! -z "$EXCLUDED_FILES" ]; then
+  for file in $EXCLUDED_FILES; do
+    echo "$file" >> ./$TEMP_EXCLUDED_FILE
+  done
+  rsync -av --delete $WIKI_DIR $TEMP_CLONE_FOLDER/ --exclude .git --exclude-from=$TEMP_EXCLUDED_FILE
+else
+  rsync -av --delete $WIKI_DIR $TEMP_CLONE_FOLDER/ --exclude .git
+fi
+
 echo "Pushing to Wiki"
 cd $TEMP_CLONE_FOLDER
 git add .

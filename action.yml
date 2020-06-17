@@ -24,6 +24,10 @@ inputs:
   WIKI_PUSH_MESSAGE:
     description: 'The commit message for the wiki commit. Default is the commit to actual repository.'
     required: false
+  EXCLUDED_FILES:
+    description: 'A list of files you want to exclude (separate with spaces).'
+    required: false
+
 branding:
   icon: upload-cloud
   color: blue
