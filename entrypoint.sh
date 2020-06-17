@@ -5,6 +5,8 @@ TEMP_EXCLUDED_FILE="temp_wiki_excluded_$GITHUB_SHA.txt"
 
 if [ -z "$GH_TOKEN" ]; then
   echo "GH_TOKEN ENV is missing. Use $\{{ secrets.GITHUB_TOKEN }} or a PAT if your wiki repo is different from your current repo."
+  exit 1
+fi
 
 if [ -z "$GH_MAIL" ]; then
   echo "GH_MAIL ENV is missing. Use the email for a user that can push to this repository."
@@ -49,13 +51,13 @@ echo $message
 
 echo "Copying files to Wiki"
 # Configuring a file to exclude specified files
-if [ ! -z "$EXCLUDED_FILES" ]; then
+if [ -z "$EXCLUDED_FILES" ]; then
+  rsync -av --delete $WIKI_DIR $TEMP_CLONE_FOLDER/ --exclude .git
+else
   for file in $EXCLUDED_FILES; do
     echo "$file" >> ./$TEMP_EXCLUDED_FILE
   done
   rsync -av --delete $WIKI_DIR $TEMP_CLONE_FOLDER/ --exclude .git --exclude-from=$TEMP_EXCLUDED_FILE
-else
-  rsync -av --delete $WIKI_DIR $TEMP_CLONE_FOLDER/ --exclude .git
 fi
 
 echo "Pushing to Wiki"
