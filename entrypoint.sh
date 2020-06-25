@@ -68,4 +68,4 @@ echo "Pushing to Wiki"
 cd $TEMP_CLONE_FOLDER
 git add .
 git commit -m "$message"
-git push --set-upstream https://$GH_TOKEN@github.com/$REPO.wiki.git master
+git push --set-upstream https://$GH_NAME:$GH_TOKEN@github.com/$REPO.wiki.git master || git push --set-upstream https://$GH_TOKEN@github.com/$REPO.wiki.git master
