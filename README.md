@@ -24,6 +24,7 @@ Table of Contents:
 
 - rsync all your files from one directory (either from the current or other repository) to your GitHub's repo's wiki.
     - rsyncing from a different repository requires a [GitHub PAT](https://github.com/settings/tokens/new?scopes=repo&description=wiki%20page%20creator%20token)
+    - If you use a private repository, you may have to use a GitHub PAT.
 - Use the commit message from your repository's git's commit. You can specify a custom one if you want.
 - Be able to exclude files and directories based on an input of a list.
 
