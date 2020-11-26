@@ -1,4 +1,4 @@
-# Andrew-Chen-Wang/github-wiki-action@v2
+# Andrew-Chen-Wang/github-wiki-action
 Updates your GitHub wiki by using rsync.
 
 This action updates your repository's wiki
@@ -12,12 +12,12 @@ is so that GitHub doesn't automatically make a Home.md
 for you again.
 
 Table of Contents:
-- Features
-- Usage
-- Inputs
-- Inspiration
-- License
-- Non-Affiliation with Github Inc.
+- [Features](#features)
+- [Usage](#usage)
+- [Inputs](#inputs)
+- [Inspiration](#inspiration)
+- [License](#license)
+- [Non-Affiliation with Github Inc.](#non-affiliation-with-github-inc)
 
 ---
 ### Features
