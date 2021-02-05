@@ -70,7 +70,8 @@ jobs:
 
 If you plan on having a different repository host your wiki
 directory, you're going to need a Personal Access Token instead of the `GITHUB_TOKEN`
-with the minimal scopes [seen here.](https://github.com/settings/tokens/new?scopes=repo&description=wiki%20page%20creator%20token)
+with the minimal scopes [seen here.](https://github.com/settings/tokens/new?scopes=repo&description=wiki%20page%20creator%20token). If you are using a private
+repository, the same rule applies.
 
 ---
 ### Inputs
@@ -78,7 +79,7 @@ with the minimal scopes [seen here.](https://github.com/settings/tokens/new?scop
 | Argument | Required | Default value | Description |
 |----------|----------|---------------|-------------|
 | WIKI_DIR | No | wiki/ | Directory to rsync files to the wiki.(https://github.com/settings/tokens/new?scopes=repo). |
-| GH_TOKEN | Yes | | The GitHub Token for this action to use. Specify `${{ secrets.GITHUB_TOKEN }}`. |
+| GH_TOKEN | Yes | | The GitHub Token for this action to use. Specify `${{ secrets.GITHUB_TOKEN }}` for public repositories. If you're commiting to a different repository or a private repository, create a [GitHub PAT](https://github.com/settings/tokens/new?scopes=repo&description=wiki%20page%20creator%20token) and save it as `GH_TOKEN`. Then, specify in your action `${{ secrets.GH_TOKEN }}`. |
 | GH_MAIL | Yes | | The email associated with the token. |
 | GH_NAME | Yes | | The username associated with the token. |
 | EXCLUDED_FILES | No | | The files or directories you want to exclude. Note, we use rsync |
