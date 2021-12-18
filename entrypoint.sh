@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 TEMP_CLONE_FOLDER="temp_wiki_$GITHUB_SHA"
 TEMP_EXCLUDED_FILE="temp_wiki_excluded_$GITHUB_SHA.txt"
@@ -63,6 +63,15 @@ else
     rm -r $TEMP_CLONE_FOLDER/$file
   done
 fi
+
+# Perform necessary conversions
+RE_MD_LINKS="(?<!!)\[(.*)\]\((.*)\)"  # Avoids converting media with negative lookbehind
+SED_MD_CMD="s/$RE_MD_LINKS/[[\1|\2]]/"  # TODO Parse content to determine new formatting
+
+shopt -s nullglob
+for i in `find . -type f -name "*.md" -o -name "*.MD" -o -name "*.Md`; do
+  sed -i $SED_MD_CMD $i
+done
 
 echo "Pushing to Wiki"
 cd $TEMP_CLONE_FOLDER
