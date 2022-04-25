@@ -28,17 +28,12 @@ if [ -z "$WIKI_DIR" ]; then
     WIKI_DIR='wiki/'
 fi
 
-echo "Configuring wiki git..."
-mkdir $TEMP_CLONE_FOLDER
-cd $TEMP_CLONE_FOLDER
-git init
+# Disable Safe Repository checks
+git config --global --add safe.directory "/github/workspace"
+git config --global --add safe.directory "/github/workspace/$TEMP_CLONE_FOLDER"
 
-# Setup credentials
-git config user.name $GH_NAME
-git config user.email $GH_MAIL
-
-git pull https://$GH_TOKEN@github.com/$REPO.wiki.git
-cd ..
+echo "Cloning wiki git..."
+git clone https://$GH_TOKEN@github.com/$REPO.wiki.git $TEMP_CLONE_FOLDER
 
 # Get commit message
 if [ -z "$WIKI_PUSH_MESSAGE" ]; then
@@ -66,6 +61,11 @@ fi
 
 echo "Pushing to Wiki"
 cd $TEMP_CLONE_FOLDER
+
+# Setup credentials
+git config user.name $GH_NAME
+git config user.email $GH_MAIL
+
 git add .
 git commit -m "$message"
-git push --set-upstream https://$GH_NAME:$GH_TOKEN@github.com/$REPO.wiki.git master || git push --set-upstream https://$GH_TOKEN@github.com/$REPO.wiki.git master
+git push origin master
