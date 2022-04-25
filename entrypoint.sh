@@ -33,7 +33,7 @@ git config --global --add safe.directory "/github/workspace"
 git config --global --add safe.directory "/github/workspace/$TEMP_CLONE_FOLDER"
 
 echo "Cloning wiki git..."
-git clone https://$GH_TOKEN@github.com/$REPO.wiki.git $TEMP_CLONE_FOLDER
+git clone https://$GH_NAME:$GH_TOKEN@github.com/$REPO.wiki.git $TEMP_CLONE_FOLDER
 
 # Get commit message
 if [ -z "$WIKI_PUSH_MESSAGE" ]; then
