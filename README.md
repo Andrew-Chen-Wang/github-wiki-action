@@ -1,3 +1,134 @@
+<div align="center">
+
+![👨‍🔬 Possibly combining with another tool... 🤝](https://user-images.githubusercontent.com/61068799/223792778-e7872171-f9c2-4aa0-8d20-0c29976e9d0d.png)
+
+</div>
+
+# Publish to GitHub wiki
+
+📖 GitHub Action to sync a folder to the GitHub wiki
+
+<div align="center">
+
+![](https://user-images.githubusercontent.com/61068799/210448771-8926fa1d-eabb-4d92-8fa0-56468c05f3b2.png)
+
+</div>
+
+📂 Keep your dev docs in sync with your code \
+🔁 Able to open PRs with docs updates \
+🗂️ Use the fancy GitHub wiki reader view
+
+## Installation
+
+![GitHub Actions](https://img.shields.io/static/v1?style=for-the-badge&message=GitHub+Actions&color=2088FF&logo=GitHub+Actions&logoColor=FFFFFF&label=)
+
+Add a GitHub Actions workflow file to your `.github/workflows/` folder similar
+to the example shown below.
+
+```yml
+name: Publish to GitHub wiki
+on:
+  push:
+    branches: [main]
+    paths: [wiki/**, .github/workflows/publish-to-github-wiki.yml]
+concurrency:
+  group: publish-to-github-wiki
+  cancel-in-progress: true
+jobs:
+  publish-to-github-wiki:
+    environment:
+      name: github-wiki
+      url: ${{ steps.publish-to-github-wiki.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - id: publish-to-github-wiki
+        uses: jcbhmr/publish-to-github-wiki@v2
+```
+
+⚠️ Make sure that any changes made to the Markdown files in the GitHub Action
+are committed (at least locally). This GitHub Action splits the Git history, not
+the state of the current directory. Untracked or uncommitted changes will be
+ignored.
+
+## Usage
+
+![GitHub](https://img.shields.io/static/v1?style=for-the-badge&message=GitHub&color=181717&logo=GitHub&logoColor=FFFFFF&label=)
+
+After creating your workflow file, now all you need is to put your Markdown
+files in a `wiki/` folder (or whatever you set the `path` option to) and commit
+them to your default branch to trigger the workflow (or whatever other trigger
+you set up).
+
+💡 Each page has an auto-generated title. It is derived from the filename by
+replacing every `-` (dash) character with a space. Name your files accordingly.
+
+💡 The `Home.md` file will automatically become the homepage, not `README.md`.
+This is specific to GitHub wikis.
+
+### Options
+
+| Option | Description                                                                                                             | Default |
+| ------ | ----------------------------------------------------------------------------------------------------------------------- | ------- |
+| `path` | Path to the wiki folder with Markdown files in it. Usually this is something like "wiki" or "docs". Defaults to "wiki". | `wiki`  |
+
+### Outputs
+
+| Output     | Description                                        | Example                                                 |
+| ---------- | -------------------------------------------------- | ------------------------------------------------------- |
+| `page_url` | Deployed wiki URL. Links to GitHub wiki Home page. | `https://github.com/jcbhmr/publish-to-github-wiki/wiki` |
+
+## Development
+
+![Codespaces](https://img.shields.io/static/v1?style=for-the-badge&message=Codespaces&color=181717&logo=GitHub&logoColor=FFFFFF&label=)
+![Devcontainers](https://img.shields.io/static/v1?style=for-the-badge&message=Devcontainers&color=2496ED&logo=Docker&logoColor=FFFFFF&label=)
+
+This project consists of a single file. If you're making a small change, you
+probably don't need a full dev environment and can just edit the file in the
+GitHub web editor or [GitHub.dev].
+
+But, if you really want some of that Bash intellisense, this project comes
+with a devcontainer config equipped with a Bash extension pack and some other
+GitHub Actions helpers like [`act`] and a few intellisense extensions for
+`actions.yml`.
+
+The way this project is tested is directly on this repository. The
+<kbd>Wiki</kbd> tab on this repository is completely nonsensical and is there
+only to test this action on itself.
+
+### Creating a new release
+
+Right now the release process is manual. Here are the steps:
+
+1. Create a semver GitHub Release: v1.2.3
+2. Mutate/create the minor tag to point to the new release: v1.2
+3. Mutate/create the major tag to point to the new release: v1
+3. `git push --tags`
+
+We end up with tags like this:
+
+```
+# Patch tags
+v1.0.0
+v1.0.1
+v1.1.0
+v2.0.0
+
+# Minor tags
+v1.0 => v1.0.1
+v1.1 => v1.1.0
+v2.0 => v2.0.0
+
+# Major tags
+v1 => v1.1.0
+v2 => v2.0.0
+```
+
+[github.dev]: https://github.com/github/dev
+[`act`]: https://github.com/nektos/act#readme
+
+---
+
 # Andrew-Chen-Wang/github-wiki-action
 Updates your GitHub wiki by using rsync.
 
@@ -59,7 +190,7 @@ jobs:
     - name: Push Wiki Changes
       uses: Andrew-Chen-Wang/github-wiki-action@v3
       env:
-        # Make sure you have that / at the end. We use rsync 
+        # Make sure you have that / at the end. We use rsync
         # WIKI_DIR's default is wiki/
         WIKI_DIR: wiki/
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
