@@ -6,17 +6,17 @@
 
 ![](https://user-images.githubusercontent.com/61068799/210448771-8926fa1d-eabb-4d92-8fa0-56468c05f3b2.png)
 
-<!-- prettier-ignore -->
+<!-- FUTURE: Add more links here like "🆕 v4" or "Real-world workflow" -->
+
 [Awesome GitHub wikis](https://github.com/MyHoneyBadger/awesome-github-wiki)
-| [What's new in v4]()
-| [Real-world workflow]()
 
 </div>
+
+<!-- FUTURE: Add "📕 Utilizes `git subtree` to preserve commit history" -->
 
 📂 Keep your dev docs in sync with your code \
 🔁 Able to open PRs with docs updates \
 🗂️ Use the fancy GitHub wiki reader view \
-📕 Utilizes `git subtree` to preserve commit history \
 💡 Inspired by [Decathlon/wiki-page-creator-action#11]
 
 ## Installation
@@ -36,8 +36,10 @@ GitHub wiki Git-based storage backend that we then push to in this Action.
 Add a GitHub Actions workflow file to your `.github/workflows/` folder similar
 to the example shown below.
 
+<!-- FUTURE: Change this to be as simple as possible (all defaults) -->
+
 ```yml
-name: Publish to GitHub wiki
+name: Wiki
 on:
   push:
     branches: [main]
@@ -51,19 +53,25 @@ jobs:
   wiki:
     environment:
       name: github-wiki
-      url: ${{ steps.github-wiki-action.outputs.page_url }}
+      url: https://github.com/${{ github.repository }}/wiki
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: Andrew-Chen-Wang/github-wiki-action@v4
-        id: github-wiki-action
+      - uses: Andrew-Chen-Wang/github-wiki-action@v3
+        with:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
+
+<!--
+FUTURE: Add this paragraph:
 
 ⚠️ Make sure that any changes made to the Markdown files in the GitHub Action
 _are also committed_! This GitHub Action uses `git subtree` which takes the
 state of the latest Git commit, not the current state of the working directory.
 You can use [EndBug/add-and-commit] or `git add -A` and
 `git commit --amend --no-edit` to commit changes inside your workflow.
+
+-->
 
 ```yml
 name: Publish to GitHub wiki
@@ -92,10 +100,12 @@ jobs:
           path: my-wiki
 ```
 
+<!-- FUTURE: Change this to `path` instead of `WIKI_DIR` -->
+
 After creating your workflow file, now all you need is to put your Markdown
-files in a `wiki/` folder (or whatever you set the `path` option to) and commit
-them to your default branch to trigger the workflow (or whatever other trigger
-you set up).
+files in a `wiki/` folder (or whatever you set the `WIKI_DIR` option to) and
+commit them to your default branch to trigger the workflow (or whatever other
+trigger you set up).
 
 💡 Each page has an auto-generated title. It is derived from the filename by
 replacing every `-` (dash) character with a space. Name your files accordingly.
@@ -114,22 +124,113 @@ offers **read** permissions to the current GitHub repository. You will need to
 either:
 
 1. Provide a custom GitHub PAT that has `contents: write` permissions. This can
-    be generated from [github.com/settings/personal-access-tokens].
+   be generated from [github.com/settings/personal-access-tokens].
 2. Upgrade the `${{ github.token }}` using the GitHub Actions' `permissions:`
-    directive. This can be done by adding `permissions: { contents: write }` to
-    the top level fields **or** to the job's fields. You can see examples of
-    both of these above.
+   directive. This can be done by adding `permissions: { contents: write }` to
+   the top level fields **or** to the job's fields. You can see examples of both
+   of these above.
 
 ⚠️ If you're pushing to another repository (**not** the one that houses the
 workflow `.yml` file) you'll always need to use a GitHub PAT.
 
 ### Options
 
-TODO: Add options table
+<!--
+NOTE: We are using a literal <table> element here instead of a Markdown table to
+give us more control over the in-source width of the text. If we did each of the
+rows in one line, each line would be like 200+ characters long. This is not
+ideal for readability. We also use &nbsp; a lot to make sure that the spaces
+aren't turned into line breaks when rendered.
+-->
+
+<table>
+  <thead>
+    <tr>
+      <th>Argument</th>
+      <th>Required</th>
+      <th>Default&nbsp;value</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>GH_TOKEN</code></td>
+      <td>Yes</td>
+      <td></td>
+      <td>
+        The GitHub API token to use. This is usually
+        <code>${{&nbsp;secrets.GITHUB_TOKEN&nbsp;}}</code> or
+        <code>${{&nbsp;github.token&nbsp;}}</code> (they are the same).
+      </td>
+    </tr>
+    <tr>
+      <td><code>GH_MAIL</code></td>
+      <td>Yes</td>
+      <td></td>
+      <td>
+        You must specify an email address to be associated with the commit that
+        we make to the wiki.
+      </td>
+    </tr>
+    <tr>
+      <td><code>GH_NAME</code></td>
+      <td>Yes</td>
+      <td></td>
+      <td>
+        In addition to an email, you must also specify a username to tie to the
+        commit that we make.
+      </td>
+    </tr>
+    <tr>
+      <td><code>WIKI_DIR</code></td>
+      <td>No</td>
+      <td><code>wiki/</code></td>
+      <td>
+        This is the directory to process and publish to the wiki. Usually it's
+        something like <code>wiki/</code> or <code>docs/</code>
+      </td>
+    </tr>
+    <tr>
+      <td><code>EXCLUDED_FILES</code></td>
+      <td>No</td>
+      <td></td>
+      <td>
+        The files or directories you want to exclude. This <em>can</em> be a glob
+        pattern. By default, we include everything.
+      </td>
+    </tr>
+    <tr>
+      <td><code>REPO</code></td>
+      <td>No</td>
+      <td><code>${{&nbsp;github.repository&nbsp;}}</code></td>
+      <td>
+        The repository to push to. This is useful if you want to push to a
+        different repository than the one that houses the workflow file. This
+        should be in the format <code>owner/repo</code>.
+      </td>
+    </tr>
+    <tr>
+      <td><code>WIKI_PUSH_MESSAGE</code></td>
+      <td>No</td>
+      <td><i>latest&nbsp;commit&nbsp;message</td>
+      <td>
+        The commit message to use when pushing to the wiki. This is useful if
+        you want to customize the commit message.
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<!--
+FUTURE: Add outputs?
 
 ### Outputs
 
 TODO: Add outputs table. Remove this if there are no outputs.
+-->
+
+<!--
+FUTURE: Add "Development" section
 
 ## Development
 
@@ -140,9 +241,9 @@ This project consists of a single file. If you're making a small change, you
 probably don't need a full dev environment and can just edit the file in the
 GitHub web editor or [GitHub.dev].
 
-But, if you really want some of that Bash intellisense, this project comes
-with a devcontainer config equipped with a Bash extension pack and some other
-GitHub Actions helpers like [`act`] and a few intellisense extensions for
+But, if you really want some of that Bash intellisense, this project comes with
+a devcontainer config equipped with a Bash extension pack and some other GitHub
+Actions helpers like [`act`] and a few intellisense extensions for
 `actions.yml`.
 
 🧪 This project is tested is directly on this repository. Check out the
@@ -151,6 +252,8 @@ GitHub Actions helpers like [`act`] and a few intellisense extensions for
 🧙‍♂️ Make sure you format your code! We use [Prettier] to format Markdown and
 [shfmt] to format Bash code. 🌋 To avoid catastorophic failure, we also use
 [shellcheck] to lint our Bash code for common errors.
+
+-->
 
 _This repository/action and its creator is not affiliated with GitHub Inc._
 
