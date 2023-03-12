@@ -77,6 +77,9 @@ You can use [EndBug/add-and-commit] or `git add -A` and
 
 -->
 
+<!--
+FUTURE: Add a second example
+
 ```yml
 name: Publish to GitHub wiki
 on:
@@ -103,6 +106,7 @@ jobs:
         with:
           path: my-wiki
 ```
+-->
 
 <!-- FUTURE: Change this to `path` instead of `WIKI_DIR` -->
 
