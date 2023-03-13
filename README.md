@@ -143,91 +143,53 @@ workflow `.yml` file) you'll always need to use a GitHub PAT.
 
 ### Options
 
-<!--
-NOTE: We are using a literal <table> element here instead of a Markdown table to
-give us more control over the in-source width of the text. If we did each of the
-rows in one line, each line would be like 200+ characters long. This is not
-ideal for readability. We also use &nbsp; a lot to make sure that the spaces
-aren't turned into line breaks when rendered.
--->
+#### `GH_TOKEN`
 
-<table>
-  <thead>
-    <tr>
-      <th>Argument</th>
-      <th>Required</th>
-      <th>Default&nbsp;value</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><code>GH_TOKEN</code></td>
-      <td>Yes</td>
-      <td></td>
-      <td>
-        The GitHub API token to use. This is usually
-        <code>${{&nbsp;secrets.GITHUB_TOKEN&nbsp;}}</code> or
-        <code>${{&nbsp;github.token&nbsp;}}</code> (they are the same).
-      </td>
-    </tr>
-    <tr>
-      <td><code>GH_MAIL</code></td>
-      <td>Yes</td>
-      <td></td>
-      <td>
-        You must specify an email address to be associated with the commit that
-        we make to the wiki.
-      </td>
-    </tr>
-    <tr>
-      <td><code>GH_NAME</code></td>
-      <td>Yes</td>
-      <td></td>
-      <td>
-        In addition to an email, you must also specify a username to tie to the
-        commit that we make.
-      </td>
-    </tr>
-    <tr>
-      <td><code>WIKI_DIR</code></td>
-      <td>No</td>
-      <td><code>wiki/</code></td>
-      <td>
-        This is the directory to process and publish to the wiki. Usually it's
-        something like <code>wiki/</code> or <code>docs/</code>
-      </td>
-    </tr>
-    <tr>
-      <td><code>EXCLUDED_FILES</code></td>
-      <td>No</td>
-      <td></td>
-      <td>
-        The files or directories you want to exclude. This <em>can</em> be a glob
-        pattern. By default, we include everything.
-      </td>
-    </tr>
-    <tr>
-      <td><code>REPO</code></td>
-      <td>No</td>
-      <td><code>${{&nbsp;github.repository&nbsp;}}</code></td>
-      <td>
-        The repository to push to. This is useful if you want to push to a
-        different repository than the one that houses the workflow file. This
-        should be in the format <code>owner/repo</code>.
-      </td>
-    </tr>
-    <tr>
-      <td><code>WIKI_PUSH_MESSAGE</code></td>
-      <td>No</td>
-      <td><i>latest&nbsp;commit&nbsp;message</td>
-      <td>
-        The commit message to use when pushing to the wiki. This is useful if
-        you want to customize the commit message.
-      </td>
-    </tr>
-  </tbody>
-</table>
+**Required**
+
+The GitHub API token to use. This is usually `${{ secrets.GITHUB_TOKEN }}` or
+`${{ github.token }}` (they are the same).
+
+#### `GH_MAIL`
+
+**Required**
+
+You must specify an email address to be associated with the commit that we make
+to the wiki.
+
+#### `GH_NAME`
+
+**Required**
+
+In addition to an email, you must also specify a username to tie to the commit
+that we make.
+
+#### `WIKI_DIR`
+
+**Default:** `wiki/`
+
+This is the directory to process and publish to the wiki. Usually it's something
+like `wiki/` or `docs/`.
+
+#### `EXCLUDED_FILES`
+
+The files or directories you want to exclude. This _can_ be a glob pattern. By
+default, we include everything.
+
+#### `REPO`
+
+**Default:** `${{ github.repository }}`
+
+The repository to push to. This is useful if you want to push to a different
+repository than the one that houses the workflow file. This should be in the
+format `owner/repo`.
+
+#### `WIKI_PUSH_MESSAGE`
+
+**Default:** _latest commit message_
+
+The commit message to use when pushing to the wiki. This is useful if you want
+to customize the commit message.
 
 <!--
 FUTURE: Add outputs?
