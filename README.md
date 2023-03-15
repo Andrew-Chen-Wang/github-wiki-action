@@ -43,11 +43,11 @@ to the example shown below.
 <!-- FUTURE: Change this to be as simple as possible (all defaults) -->
 
 ```yml
-name: Wiki
+name: Publish wiki
 on:
   push:
     branches: [main]
-    paths: [wiki/**, .github/workflows/wiki.yml]
+    paths: [wiki/**, .github/workflows/publish-wiki.yml]
 concurrency:
   group: wiki
   cancel-in-progress: true
