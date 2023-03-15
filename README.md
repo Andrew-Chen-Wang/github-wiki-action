@@ -55,9 +55,6 @@ permissions:
   contents: write
 jobs:
   wiki:
-    environment:
-      name: github-wiki
-      url: https://github.com/${{ github.repository }}/wiki
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
