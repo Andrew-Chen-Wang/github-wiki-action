@@ -62,7 +62,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: Andrew-Chen-Wang/github-wiki-action@v3
-        with:
+        # ⚠️ We use the env: key to provide our inputs! See #27.
+        env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
