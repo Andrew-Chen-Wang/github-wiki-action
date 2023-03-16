@@ -4,7 +4,7 @@
 
 <div align="center">
 
-![](https://user-images.githubusercontent.com/61068799/210448771-8926fa1d-eabb-4d92-8fa0-56468c05f3b2.png)
+![](https://user-images.githubusercontent.com/61068799/225482167-8228fa46-ceb2-407d-b5a9-c02495965f79.png)
 
 <!-- FUTURE: Add more links here like "🆕 v4" or "Real-world workflow" -->
 
