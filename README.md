@@ -20,11 +20,11 @@ Add a GitHub Actions workflow file to your `.github/workflows/` folder similar
 to the example shown below.
 
 ```yml
-name: Publish wiki
+name: Wiki
 on:
   push:
     branches: [main]
-    paths: [wiki/**, .github/workflows/publish-wiki.yml]
+    paths: [wiki/**, .github/workflows/wiki.yml]
 concurrency:
   group: wiki
   cancel-in-progress: true
