@@ -53,12 +53,8 @@ trigger you set up).
 
 💡 Each page has an auto-generated title. It is derived from the filename by
 replacing every `-` (dash) character with a space. Name your files accordingly.
-
-💡 The `Home.md` file will automatically become the homepage, not `README.md`.
-This is specific to GitHub wikis. You can use a preprocessor like [TBD] to
-automagically ✨ change `README.md` into `Home.md` and rewrite links from
-`./My-sibling-page.md` to `./My-sibling-page` to work when deployed to the
-GitHub wiki.
+The `Home.md` file will automatically become the homepage, not `README.md`. This
+is specific to GitHub wikis.
 
 ### GitHub token
 
