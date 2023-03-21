@@ -16,15 +16,6 @@ support documentation.
 ![GitHub Actions](https://img.shields.io/static/v1?style=for-the-badge&message=GitHub+Actions&color=2088FF&logo=GitHub+Actions&logoColor=FFFFFF&label=)
 ![GitHub](https://img.shields.io/static/v1?style=for-the-badge&message=GitHub&color=181717&logo=GitHub&logoColor=FFFFFF&label=)
 
-⚠️ You must create a dummy page manually! This is what initially creates the
-GitHub wiki Git-based storage backend that we then push to in this Action.
-
-<div align="center">
-
-![](https://user-images.githubusercontent.com/61068799/224426115-98106d72-6323-4101-8d08-f349af3fcc03.png)
-
-</div>
-
 Add a GitHub Actions workflow file to your `.github/workflows/` folder similar
 to the example shown below.
 
@@ -49,6 +40,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
+
+<img align="right" alt="Screenshot of 'Create the first page' button" src="https://i.imgur.com/ABKIS4h.png" />
+
+⚠️ You must create a dummy page manually! This is what initially creates the
+GitHub wiki Git-based storage backend that we then push to in this Action.
 
 After creating your workflow file, now all you need is to put your Markdown
 files in a `wiki/` folder (or whatever you set the `WIKI_DIR` option to) and
