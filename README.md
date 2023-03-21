@@ -42,6 +42,9 @@ jobs:
           WIKI_DIR: my-octocat-wiki/
           # You MUST manually pass in the GitHub token.
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # These are currently REQUIRED options
+          GH_MAIL: actions@users.noreply.github.com
+          GH_NAME: actions[bot]
 ```
 
 <img align="right" alt="Screenshot of 'Create the first page' button" src="https://i.imgur.com/ABKIS4h.png" />
@@ -78,53 +81,32 @@ workflow `.yml` file) you'll always need to use a GitHub PAT.
 
 ### Options
 
-#### `GH_TOKEN`
+⚠️ This action uses `env:` to supply these options, not `with:`!
 
-**Required**
+- **`GH_TOKEN`:** The GitHub API token to use. This is usually
+  `${{ secrets.GITHUB_TOKEN }}` or `${{ github.token }}` (they are the same).
+  This is **required**.
 
-The GitHub API token to use. This is usually `${{ secrets.GITHUB_TOKEN }}` or
-`${{ github.token }}` (they are the same).
+- **`GH_MAIL`:** You must specify an email address to be associated with the
+  commit that we make to the wiki. This is **required**.
 
-#### `GH_MAIL`
+- **`GH_NAME`:** In addition to an email, you must also specify a username to
+  tie to the commit that we make. This is **required**.
 
-**Required**
+- **`WIKI_DIR`:** This is the directory to process and publish to the wiki.
+  Usually it's something like `wiki/` or `docs/`. The default is `wiki/`.
 
-You must specify an email address to be associated with the commit that we make
-to the wiki.
+- **`EXCLUDED_FILES`:** The files or directories you want to exclude. This _can_
+  be a glob pattern. By default, we include everything.
 
-#### `GH_NAME`
+- **`REPO`:** The repository to push to. This is useful if you want to push to a
+  different repository than the one that houses the workflow file. This should
+  be in the format `owner/repo`. The default is `${{ github.repository }}` (the
+  current repo).
 
-**Required**
-
-In addition to an email, you must also specify a username to tie to the commit
-that we make.
-
-#### `WIKI_DIR`
-
-**Default:** `wiki/`
-
-This is the directory to process and publish to the wiki. Usually it's something
-like `wiki/` or `docs/`.
-
-#### `EXCLUDED_FILES`
-
-The files or directories you want to exclude. This _can_ be a glob pattern. By
-default, we include everything.
-
-#### `REPO`
-
-**Default:** `${{ github.repository }}`
-
-The repository to push to. This is useful if you want to push to a different
-repository than the one that houses the workflow file. This should be in the
-format `owner/repo`.
-
-#### `WIKI_PUSH_MESSAGE`
-
-**Default:** _latest commit message_
-
-The commit message to use when pushing to the wiki. This is useful if you want
-to customize the commit message.
+- **`WIKI_PUSH_MESSAGE`:** The commit message to use when pushing to the wiki.
+  This is useful if you want to customize the commit message. The default is the
+  latest commit message from the main Git repo.
 
 <!-- prettier-ignore-start -->
 [github.dev]: https://github.com/github/dev
