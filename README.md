@@ -2,14 +2,6 @@
 
 📖 GitHub Action to sync a folder to the GitHub wiki
 
-<div align="center">
-
-![](https://user-images.githubusercontent.com/61068799/225482167-8228fa46-ceb2-407d-b5a9-c02495965f79.png)
-
-[Awesome GitHub wikis](https://github.com/MyHoneyBadger/awesome-github-wiki)
-
-</div>
-
 📂 Keep your dev docs in sync with your code \
 🔁 Able to open PRs with docs updates \
 🗂️ Use the fancy GitHub wiki reader view \
