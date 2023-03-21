@@ -6,13 +6,9 @@
 
 ![](https://user-images.githubusercontent.com/61068799/225482167-8228fa46-ceb2-407d-b5a9-c02495965f79.png)
 
-<!-- FUTURE: Add more links here like "🆕 v4" or "Real-world workflow" -->
-
 [Awesome GitHub wikis](https://github.com/MyHoneyBadger/awesome-github-wiki)
 
 </div>
-
-<!-- FUTURE: Add "📕 Utilizes `git subtree` to preserve commit history" -->
 
 📂 Keep your dev docs in sync with your code \
 🔁 Able to open PRs with docs updates \
@@ -40,8 +36,6 @@ GitHub wiki Git-based storage backend that we then push to in this Action.
 Add a GitHub Actions workflow file to your `.github/workflows/` folder similar
 to the example shown below.
 
-<!-- FUTURE: Change this to be as simple as possible (all defaults) -->
-
 ```yml
 name: Publish wiki
 on:
@@ -63,50 +57,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
-
-<!--
-FUTURE: Add this paragraph:
-
-⚠️ Make sure that any changes made to the Markdown files in the GitHub Action
-_are also committed_! This GitHub Action uses `git subtree` which takes the
-state of the latest Git commit, not the current state of the working directory.
-You can use [EndBug/add-and-commit] or `git add -A` and
-`git commit --amend --no-edit` to commit changes inside your workflow.
-
--->
-
-<!--
-FUTURE: Add a second example
-
-```yml
-name: Publish to GitHub wiki
-on:
-  push:
-    branches: [main]
-    paths: [wiki/**, .github/workflows/wiki.yml]
-concurrency:
-  group: wiki
-  cancel-in-progress: true
-permissions:
-  contents: write
-jobs:
-  wiki:
-    environment:
-      name: github-wiki
-      url: ${{ steps.github-wiki-action.outputs.page_url }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - run: date > my-wiki/Todays-date.md
-      - uses: EndBug/add-and-commit@v9
-      - uses: Andrew-Chen-Wang/github-wiki-action@v4
-        id: github-wiki-action
-        with:
-          path: my-wiki
-```
--->
-
-<!-- FUTURE: Change this to `path` instead of `WIKI_DIR` -->
 
 After creating your workflow file, now all you need is to put your Markdown
 files in a `wiki/` folder (or whatever you set the `WIKI_DIR` option to) and
@@ -188,40 +138,6 @@ format `owner/repo`.
 
 The commit message to use when pushing to the wiki. This is useful if you want
 to customize the commit message.
-
-<!--
-FUTURE: Add outputs?
-
-### Outputs
-
-TODO: Add outputs table. Remove this if there are no outputs.
--->
-
-<!--
-FUTURE: Add "Development" section
-
-## Development
-
-![Codespaces](https://img.shields.io/static/v1?style=for-the-badge&message=Codespaces&color=181717&logo=GitHub&logoColor=FFFFFF&label=)
-![Devcontainers](https://img.shields.io/static/v1?style=for-the-badge&message=Devcontainers&color=2496ED&logo=Docker&logoColor=FFFFFF&label=)
-
-This project consists of a single file. If you're making a small change, you
-probably don't need a full dev environment and can just edit the file in the
-GitHub web editor or [GitHub.dev].
-
-But, if you really want some of that Bash intellisense, this project comes with
-a devcontainer config equipped with a Bash extension pack and some other GitHub
-Actions helpers like [`act`] and a few intellisense extensions for
-`actions.yml`.
-
-🧪 This project is tested is directly on this repository. Check out the
-`test.yml` workflow and the <kbd>Wiki</kbd> tab to see it in action!
-
-🧙‍♂️ Make sure you format your code! We use [Prettier] to format Markdown and
-[shfmt] to format Bash code. 🌋 To avoid catastorophic failure, we also use
-[shellcheck] to lint our Bash code for common errors.
-
--->
 
 <!-- prettier-ignore-start -->
 [github.dev]: https://github.com/github/dev
