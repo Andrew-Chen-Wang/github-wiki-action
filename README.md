@@ -38,6 +38,9 @@ jobs:
       - uses: Andrew-Chen-Wang/github-wiki-action@v3
         # ⚠️ We use the env: key to provide our inputs! See #27.
         env:
+          # Make sure this has a slash at the end! We use wiki/ by default.
+          WIKI_DIR: my-octocat-wiki/
+          # You MUST manually pass in the GitHub token.
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
