@@ -105,12 +105,6 @@ workflow `.yml` file) you'll always need to use a GitHub PAT.
   latest commit message from the main Git repo.
 
 <!-- prettier-ignore-start -->
-[github.dev]: https://github.com/github/dev
-[`act`]: https://github.com/nektos/act#readme
-[EndBug/add-and-commit]: https://github.com/EndBug/add-and-commit#readme
 [github.com/settings/personal-access-tokens]: https://github.com/settings/personal-access-tokens
 [Decathlon/wiki-page-creator-action#11]: https://github.com/Decathlon/wiki-page-creator-action/issues/11
-[shfmt]: https://github.com/mvdan/sh#shfmt
-[shellcheck]: https://www.shellcheck.net/
-[prettier]: https://prettier.io/
 <!-- prettier-ignore-end -->
