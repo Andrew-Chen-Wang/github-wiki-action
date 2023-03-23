@@ -7,10 +7,6 @@
 🗂️ Use the fancy GitHub wiki reader view \
 💡 Inspired by [Decathlon/wiki-page-creator-action#11]
 
-**GitHub Wiki Action** is not certified by GitHub. It is provided by a
-third-party and is governed by separate terms of service, privacy policy, and
-support documentation.
-
 ## Installation
 
 ![GitHub Actions](https://img.shields.io/static/v1?style=for-the-badge&message=GitHub+Actions&color=2088FF&logo=GitHub+Actions&logoColor=FFFFFF&label=)
