@@ -1,3 +1,5 @@
+# Copyright 2023 Andrew Chen Wang
+# SPDX-License-Identifier: Apache-2.0
 name: GitHub Wiki Action
 author: Andrew Chen Wang <acwangpython@gmail.com>
 description: This action publishes Wiki pages with a provided directory into a GitHub repository's Wiki.
