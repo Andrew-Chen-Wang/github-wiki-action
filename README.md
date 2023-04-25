@@ -1,122 +1,115 @@
-# Andrew-Chen-Wang/github-wiki-action
-Updates your GitHub wiki by using rsync.
+<!--
+Copyright 2023 Andrew Chen Wang
+SPDX-License-Identifier: Apache-2.0
+-->
 
-This action updates your repository's wiki
-based on a single directory that matches with
-your Wiki's git. You can use a Wiki directory
-from any repository you wish.
+# Publish to GitHub wiki
 
-_**It is recommended that you still have a Home.md
-or whatever extension you want instead of MD.**_ This
-is so that GitHub doesn't automatically make a Home.md
-for you again.
+📖 GitHub Action to sync a folder to the GitHub wiki
 
-Table of Contents:
-- [Features](#features)
-- [Usage](#usage)
-- [Inputs](#inputs)
-- [Inspiration](#inspiration)
-- [License](#license)
-- [Non-Affiliation with Github Inc.](#non-affiliation-with-github-inc)
+📂 Keep your dev docs in sync with your code \
+🔁 Able to open PRs with docs updates \
+🗂️ Use the fancy GitHub wiki reader view \
+💡 Inspired by [Decathlon/wiki-page-creator-action#11]
 
----
-### Features
+## Installation
 
-- rsync all your files from one directory (either from the current or other repository) to your GitHub's repo's wiki.
-    - rsyncing from a different repository requires a [GitHub PAT](https://github.com/settings/tokens/new?scopes=repo&description=wiki%20page%20creator%20token)
-    - If you use a private repository, you may have to use a GitHub PAT.
-- Use the commit message from your repository's git's commit. You can specify a custom one if you want.
-- Be able to exclude files and directories based on an input of a list.
+![GitHub Actions](https://img.shields.io/static/v1?style=for-the-badge&message=GitHub+Actions&color=2088FF&logo=GitHub+Actions&logoColor=FFFFFF&label=)
+![GitHub](https://img.shields.io/static/v1?style=for-the-badge&message=GitHub&color=181717&logo=GitHub&logoColor=FFFFFF&label=)
 
----
-### Usage
+Add a GitHub Actions workflow file to your `.github/workflows/` folder similar
+to the example shown below.
 
-You must have a single wiki page available from the beginning.
-It can be blank, but there must be at least one page that exists.
-You must also have a directory where all your wiki files will
-be located (the default directory is "wiki/"). To include the
-mandatory homepage, have a file in your wiki/ directory
-called Home.md or with any other extension (e.g. rst).
-
-```yaml
-name: Deploy Wiki
-
+```yml
+name: Wiki
 on:
   push:
-    paths:
-      # Trigger only when wiki directory changes
-      - 'wiki/**'
-    branches:
-      # And only on master branch
-      - master
-
+    branches: [main]
+    paths: [wiki/**, .github/workflows/wiki.yml]
+concurrency:
+  group: wiki
+  cancel-in-progress: true
+permissions:
+  contents: write
 jobs:
-  deploy-wiki:
+  wiki:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-
-    - name: Push Wiki Changes
-      uses: Andrew-Chen-Wang/github-wiki-action@v3
-      env:
-        # Make sure you have that / at the end. We use rsync 
-        # WIKI_DIR's default is wiki/
-        WIKI_DIR: wiki/
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        GH_MAIL: ${{ secrets.YOUR_EMAIL }}
-        GH_NAME: ${{ github.repository_owner }}
-        EXCLUDED_FILES: "a/ b.md"
+      - uses: actions/checkout@v3
+      - uses: Andrew-Chen-Wang/github-wiki-action@v3
+        # ⚠️ We use the env: key to provide our inputs! See #27.
+        env:
+          # Make sure this has a slash at the end! We use wiki/ by default.
+          WIKI_DIR: my-octocat-wiki/
+          # You MUST manually pass in the GitHub token.
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # These are currently REQUIRED options
+          GH_MAIL: actions@users.noreply.github.com
+          GH_NAME: actions[bot]
 ```
 
-If you plan on having a different repository host your wiki
-directory, you're going to need a Personal Access Token instead of the `GITHUB_TOKEN`
-with the minimal scopes [seen here.](https://github.com/settings/tokens/new?scopes=repo&description=wiki%20page%20creator%20token). If you are using a private
-repository, the same rule applies.
+<img align="right" alt="Screenshot of 'Create the first page' button" src="https://i.imgur.com/ABKIS4h.png" />
 
----
-### Inputs
+⚠️ You must create a dummy page manually! This is what initially creates the
+GitHub wiki Git-based storage backend that we then push to in this Action.
 
-| Argument | Required | Default value | Description |
-|----------|----------|---------------|-------------|
-| WIKI_DIR | No | wiki/ | Directory to rsync files to the wiki.(https://github.com/settings/tokens/new?scopes=repo). |
-| GH_TOKEN | Yes | | The GitHub Token for this action to use. Specify `${{ secrets.GITHUB_TOKEN }}` for public repositories. If you're commiting to a different repository or a private repository, create a [GitHub PAT](https://github.com/settings/tokens/new?scopes=repo&description=wiki%20page%20creator%20token) and save it in GitHub secrets as `GH_TOKEN`. Then, specify in your action `${{ secrets.GH_TOKEN }}`. |
-| GH_MAIL | Yes | | The email associated with the token. |
-| GH_NAME | Yes | | The username associated with the token. |
-| EXCLUDED_FILES | No | | The files or directories you want to exclude. Note, we use rsync |
-| REPO | No | `${{ github.repository }}` | The target repository. Default is the current repo. If you specify a different repository (e.g. Andrew-Chen-Wang/github-wiki-action), then you must use a PAT. |
-| WIKI_PUSH_MESSAGE | No | Your commit's message | The message to add to your commit to the wiki git |
+After creating your workflow file, now all you need is to put your Markdown
+files in a `wiki/` folder (or whatever you set the `WIKI_DIR` option to) and
+commit them to your default branch to trigger the workflow (or whatever other
+trigger you set up).
 
----
-### Inspiration
-This intended usage was to avoid hosting a private ReadTheDocs
-and instead just use GitHub wiki.
+💡 Each page has an auto-generated title. It is derived from the filename by
+replacing every `-` (dash) character with a space. Name your files accordingly.
+The `Home.md` file will automatically become the homepage, not `README.md`. This
+is specific to GitHub wikis.
 
-Largely inspired by [wiki-page-creator-action](https://github.com/Decathlon/wiki-page-creator-action)
-and the [issue that arose from it](https://github.com/Decathlon/wiki-page-creator-action/issues/11),
-this GitHub action tries to update the entire wiki based on a single
-directory.
+### GitHub token
 
----
-### License
+This actions needs a GitHub token that can write to the GitHub wiki of the
+selected repository. By default, the `${{ github.token }}` you are given only
+offers **read** permissions to the current GitHub repository. You will need to
+either:
 
-```
-   Copyright 2020 Andrew Chen Wang
+1. Provide a custom GitHub PAT that has `contents: write` permissions. This can
+   be generated from [github.com/settings/personal-access-tokens].
+2. Upgrade the `${{ github.token }}` using the GitHub Actions' `permissions:`
+   directive. This can be done by adding `permissions: { contents: write }` to
+   the top level fields **or** to the job's fields. You can see examples of both
+   of these above.
 
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
+⚠️ If you're pushing to another repository (**not** the one that houses the
+workflow `.yml` file) you'll always need to use a GitHub PAT.
 
-       http://www.apache.org/licenses/LICENSE-2.0
+### Options
 
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-```
+⚠️ This action uses `env:` to supply these options, not `with:`!
 
----
-### Non-Affiliation with GitHub Inc.
+- **`GH_TOKEN`:** The GitHub API token to use. This is usually
+  `${{ secrets.GITHUB_TOKEN }}` or `${{ github.token }}` (they are the same).
+  This is **required**.
 
-This repository/action and its creator is not affiliated with
-GitHub Inc.
+- **`GH_MAIL`:** You must specify an email address to be associated with the
+  commit that we make to the wiki. This is **required**.
+
+- **`GH_NAME`:** In addition to an email, you must also specify a username to
+  tie to the commit that we make. This is **required**.
+
+- **`WIKI_DIR`:** This is the directory to process and publish to the wiki.
+  Usually it's something like `wiki/` or `docs/`. The default is `wiki/`.
+
+- **`EXCLUDED_FILES`:** The files or directories you want to exclude. This _can_
+  be a glob pattern. By default, we include everything.
+
+- **`REPO`:** The repository to push to. This is useful if you want to push to a
+  different repository than the one that houses the workflow file. This should
+  be in the format `owner/repo`. The default is `${{ github.repository }}` (the
+  current repo).
+
+- **`WIKI_PUSH_MESSAGE`:** The commit message to use when pushing to the wiki.
+  This is useful if you want to customize the commit message. The default is the
+  latest commit message from the main Git repo.
+
+<!-- prettier-ignore-start -->
+[github.com/settings/personal-access-tokens]: https://github.com/settings/personal-access-tokens
+[Decathlon/wiki-page-creator-action#11]: https://github.com/Decathlon/wiki-page-creator-action/issues/11
+<!-- prettier-ignore-end -->
