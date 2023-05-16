@@ -68,7 +68,10 @@ git add -Av
 # This sets the default author & committer for the Git commit that we make. If
 # you want to change this, you can! You can set the $GIT_AUTHOR_* and
 # $GIT_COMMITTER_* env vars in your workflow and they should pass down to this
-# 'git commit' operation.
+# 'git commit' operation. These values are from one of the popular Git commit
+# actions: stefanzweifel/git-auto-commit-action [1]
+#
+# [1]: https://github.com/stefanzweifel/git-auto-commit-action/blob/master/action.yml#L35-L42
 git config user.name github-actions[bot]
 git config user.email 41898282+github-actions[bot]@users.noreply.github.com
 # Allowing an empty commit is way easier than detecting empty commits! This also
