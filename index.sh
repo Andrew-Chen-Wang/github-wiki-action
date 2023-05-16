@@ -81,6 +81,15 @@ git config user.email 41898282+github-actions[bot]@users.noreply.github.com
 # that even if the commit is empty, the message has the SHA there.
 git commit --allow-empty -m "$INPUT_COMMIT_MESSAGE"
 
+# If we are given 'dry-run: true', then we want to just print changes and stop
+# without pushing. This is only used in testing right now.
+if [[ $INPUT_DRY_RUN == true ]]; then
+  echo 'Dry run'
+  git remote show origin
+  git show
+  exit 0
+fi
+
 # This is the pushing operation! The origin remote looks something like:
 # "https://github.com/octocat/awesome.wiki.git" with no token attached. That
 # 'gh auth setup-git' is what makes the username & password automagically attach
