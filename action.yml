@@ -41,6 +41,13 @@ inputs:
       sure these paths are relative to the path option! The default is none.
     required: true
     default: ""
+  dry-run:
+    description: >-
+      Whether or not to actually attempt to push changes back to the wiki
+      itself. If this is set to true, we instead print the remote URL and do not
+      push to the remote wiki. The default is false. This is useful for testing.
+    required: true
+    default: false
 runs:
   using: composite
   steps:
@@ -53,3 +60,4 @@ runs:
         INPUT_PATH: ${{ inputs.path }}
         INPUT_COMMIT_MESSAGE: ${{ inputs.commit-message }}
         INPUT_IGNORE: ${{ inputs.ignore }}
+        INPUT_DRY_RUN: ${{ inputs.dry-run }}
