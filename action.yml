@@ -9,6 +9,15 @@ branding:
   icon: book
   color: blue
 inputs:
+  strategy:
+    description: >-
+      Select from 'clone' or 'init' to determine which method to use to push
+      changes to the GitHub wiki. 'clone' will clone the .wiki.git repo and add
+      an additional commit. 'init' will create a new repo with a single commit
+      and force push to the .wiki.git. 'init' involves a force-push! The default
+      is 'clone'.
+    required: true
+    default: clone
   repository:
     description: >-
       The repository housing the wiki. Use this if you're publishing to a wiki
@@ -47,6 +56,7 @@ runs:
     - run: '"${GITHUB_ACTION_PATH%/}/index.sh"'
       shell: bash
       env:
+        INPUT_STRATEGY: ${{ inputs.strategy }}
         INPUT_REPOSITORY: ${{ inputs.repository }}
         INPUT_TOKEN: ${{ inputs.token }}
         INPUT_PATH: ${{ inputs.path }}
