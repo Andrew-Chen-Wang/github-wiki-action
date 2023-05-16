@@ -1,35 +1,55 @@
 # Copyright 2023 Andrew Chen Wang
+# Copyright 2023 Jacob Hummer
 # SPDX-License-Identifier: Apache-2.0
+
 name: GitHub Wiki Action
 author: Andrew Chen Wang <acwangpython@gmail.com>
-description: This action publishes Wiki pages with a provided directory into a GitHub repository's Wiki.
-runs:
-  using: 'docker'
-  image: 'Dockerfile'
-inputs:
-  WIKI_DIR:
-    description: 'Directory to rsync files to the wiki.'
-    required: false
-    default: 'wiki/'
-  GH_TOKEN:
-    description: 'The GitHub Token for this action to use. Specify secrets.GITHUB_TOKEN.'
-    required: true
-  GH_MAIL:
-    description: 'The email associated with the token.'
-    required: true
-  GH_NAME:
-    description: 'The username associated with the token.'
-    required: true
-  REPO:
-    description: 'The target repository. Default is the current repo.'
-    required: false
-  WIKI_PUSH_MESSAGE:
-    description: 'The commit message for the wiki commit. Default is the commit to actual repository.'
-    required: false
-  EXCLUDED_FILES:
-    description: 'A list of files you want to exclude (separate with spaces).'
-    required: false
-
+description: 📖 Deploy docs from your source tree to the GitHub wiki
 branding:
-  icon: upload-cloud
+  icon: book
   color: blue
+inputs:
+  repository:
+    description: >-
+      The repository housing the wiki. Use this if you're publishing to a wiki
+      that's not the current repository. You can change the GitHub server with
+      the github-server-url input. Default is github.repository.
+    required: true
+    default: ${{ github.repository }}
+  token:
+    description: >-
+      github.token is the default. This token is used when cloning and pushing
+      wiki changes.
+    required: true
+    default: ${{ github.token }}
+  path:
+    description: >-
+      The directory to use for your wiki contents. Default wiki.
+    required: true
+    default: wiki
+  commit-message:
+    description: >-
+      The message to use when committing new content. Default is 'Update wiki
+      github.sha'. You probably don't need to change this, since this only
+      applies if you look really closely in your wiki.
+    required: true
+    default: Update wiki ${{ github.sha }}
+  ignore:
+    description: >-
+      A multiline list of files that should be ignored when committing and
+      pushing to the remote wiki. Each line is a pattern like .gitignore. Make
+      sure these paths are relative to the path option! The default is none.
+    required: true
+    default: ""
+runs:
+  using: composite
+  steps:
+    - id: index
+      run: '"${GITHUB_ACTION_PATH%/}/index.sh"'
+      shell: bash
+      env:
+        INPUT_REPOSITORY: ${{ inputs.repository }}
+        INPUT_TOKEN: ${{ inputs.token }}
+        INPUT_PATH: ${{ inputs.path }}
+        INPUT_COMMIT_MESSAGE: ${{ inputs.commit-message }}
+        INPUT_IGNORE: ${{ inputs.ignore }}
