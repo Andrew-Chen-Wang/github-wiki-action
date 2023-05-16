@@ -100,6 +100,22 @@ workflow `.yml` file) you'll always need to use a GitHub PAT.
   and pushing to the remote wiki. Each line is a pattern like `.gitignore`. Make
   sure these paths are relative to the path option! The default is none.
 
+#### `strategy:` option
+
+There are some specific usecases where using `strategy: init` might be better
+than the default `strategy: clone`.
+
+1. **Your wiki is enormous.** And I don't mean in terms of text. Text is nothing
+   compared with images. If your wiki has a lot of included images, then you
+   probably don't want to store the complete history of those large binary
+   files. Instead, you can use `strategy: init` to create a single commit each
+   time.
+
+2. **You prefer the "deploy" semantics.** If you just like the feel of having
+   your GitHub wiki act more like GitHub Pages, that's great! You can `--force`
+   push using `strategy: init` on each wiki deployment and none of that pesky
+   history will be saved.
+
 <!-- prettier-ignore-start -->
 [github.com/settings/personal-access-tokens]: https://github.com/settings/personal-access-tokens
 [Decathlon/wiki-page-creator-action#11]: https://github.com/Decathlon/wiki-page-creator-action/issues/11
