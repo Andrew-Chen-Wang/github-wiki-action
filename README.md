@@ -76,6 +76,12 @@ workflow `.yml` file) you'll always need to use a GitHub PAT.
 
 ### Options
 
+- **`strategy`:** Select from `clone` or `init` to determine which method to use
+  to push changes to the GitHub wiki. `clone` will clone the `.wiki.git` repo
+  and add an additional commit. `init` will create a new repo with a single
+  commit and force push to the `.wiki.git`. `init` involves a force-push! The
+  default is `clone`.
+
 - **`repository`:** The repository housing the wiki. Use this if you're
   publishing to a wiki that's not the current repository. You can change the
   GitHub server with the `github-server-url` input. Default is
