@@ -14,7 +14,15 @@ set -e
 # repo that we want to use instead. We use the same var names to make it
 # familiar.
 export GITHUB_TOKEN="$INPUT_TOKEN"
+export GITHUB_SERVER_URL="$INPUT_GITHUB_SERVER_URL"
 export GITHUB_REPOSITORY="$INPUT_REPOSITORY"
+# This is the default host that gh uses for clones and commands without a repo
+# context (a .git folder). We use Bash string magic to get the github.com part
+# from a full origin (no pathname) like https://github.com => github.com. The
+# '#*//' operation removes '*//' from the start of the string. That's the
+# 'https://' chunk. With that gone, we are left with 'github.company.com' or
+# something similar.
+export GH_HOST="${GITHUB_SERVER_URL#*//}"
 
 # We configure some special $GIT_* environment variables to make it so that
 # we can have our special .git folder (you know, the one that holds all the
@@ -54,7 +62,7 @@ git config --global --add safe.directory "$GIT_DIR"
 # use as our .git folder that we commit to and use for the rest of the Git
 # stuff. The $GIT_WORK_TREE is already set to use the $INPUT_PATH (likely a
 # folder like 'wiki/').
-git clone "https://github.com/$GITHUB_REPOSITORY.wiki.git" "$GIT_DIR" --bare
+git clone "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.wiki.git" "$GIT_DIR" --bare
 # This is a trick to make the git CLI think that there should be a worktree too!
 # By default, --bare Git repos are pretty inert. We unset this and then use our
 # previously configured $GIT_WORK_TREE.
