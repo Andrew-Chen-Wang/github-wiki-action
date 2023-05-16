@@ -14,15 +14,7 @@ set -e
 # repo that we want to use instead. We use the same var names to make it
 # familiar.
 export GITHUB_TOKEN="$INPUT_TOKEN"
-export GITHUB_SERVER_URL="$INPUT_GITHUB_SERVER_URL"
 export GITHUB_REPOSITORY="$INPUT_REPOSITORY"
-# This is the default host that gh uses for clones and commands without a repo
-# context (a .git folder). We use Bash string magic to get the github.com part
-# from a full origin (no pathname) like https://github.com => github.com. The
-# '#*//' operation removes '*//' from the start of the string. That's the
-# 'https://' chunk. With that gone, we are left with 'github.company.com' or
-# something similar.
-export GH_HOST="${GITHUB_SERVER_URL#*//}"
 
 # We configure some special $GIT_* environment variables to make it so that
 # we can have our special .git folder (you know, the one that holds all the
@@ -62,7 +54,7 @@ git config --global --add safe.directory "$GIT_DIR"
 # use as our .git folder that we commit to and use for the rest of the Git
 # stuff. The $GIT_WORK_TREE is already set to use the $INPUT_PATH (likely a
 # folder like 'wiki/').
-git clone "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.wiki.git" "$GIT_DIR" --bare
+git clone "https://github.com/$GITHUB_REPOSITORY.wiki.git" "$GIT_DIR" --bare
 # This is a trick to make the git CLI think that there should be a worktree too!
 # By default, --bare Git repos are pretty inert. We unset this and then use our
 # previously configured $GIT_WORK_TREE.
@@ -85,15 +77,6 @@ git config user.email 41898282+github-actions[bot]@users.noreply.github.com
 # This works well with the default "Update wiki ${{ github.sha }}" message so
 # that even if the commit is empty, the message has the SHA there.
 git commit --allow-empty -m "$INPUT_COMMIT_MESSAGE"
-
-# If we are given 'dry-run: true', then we want to just print changes and stop
-# without pushing. This is only used in testing right now.
-if [[ $INPUT_DRY_RUN == true ]]; then
-  echo 'Dry run'
-  git remote show origin
-  git show
-  exit 0
-fi
 
 # This is the pushing operation! The origin remote looks something like:
 # "https://github.com/octocat/awesome.wiki.git" with no token attached. That
