@@ -4,7 +4,7 @@
 name: Update tags
 on:
   release:
-    types: [published]
+    types: [released]
 concurrency:
   group: update-tags
   cancel-in-progress: true
