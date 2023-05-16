@@ -109,7 +109,30 @@ workflow `.yml` file) you'll always need to use a GitHub PAT.
   This is useful if you want to customize the commit message. The default is the
   latest commit message from the main Git repo.
 
+### Preprocessing
+
+You may wish to strip the `[link](page.md)` `.md` suffix from your links to make
+them viewable in GitHub source view (with the `.md`) _as well as_ in GitHub wiki
+(without the `.md`; pretty URLs!). You can use a preprocessing action like
+[Strip MarkDown extensions from links action] to remove those `.md` suffixes
+before using this action. Here's an example:
+
+```yml
+publish-wiki:
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v3
+    - uses: impresscms-dev/strip-markdown-extensions-from-links-action@v1.0.0
+      with:
+        path: wiki
+    - uses: Andrew-Chen-Wang/github-wiki-action@v4
+```
+
+❤️ If you have an awesome preprocessor action that you want to add here, let us
+know! We'd love to add an example.
+
 <!-- prettier-ignore-start -->
 [github.com/settings/personal-access-tokens]: https://github.com/settings/personal-access-tokens
 [Decathlon/wiki-page-creator-action#11]: https://github.com/Decathlon/wiki-page-creator-action/issues/11
+[Strip MarkDown extensions from links action]: https://github.com/marketplace/actions/strip-markdown-extensions-from-links-action
 <!-- prettier-ignore-end -->
