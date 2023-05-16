@@ -53,7 +53,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - run: '"${GITHUB_ACTION_PATH%/}/index.sh"'
+    - run: '"${GITHUB_ACTION_PATH%/}/src/$INPUT_STRATEGY.sh"'
       shell: bash
       env:
         INPUT_STRATEGY: ${{ inputs.strategy }}
