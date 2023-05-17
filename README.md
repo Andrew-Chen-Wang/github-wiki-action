@@ -124,4 +124,5 @@ workflow `.yml` file) you'll always need to use a GitHub PAT.
 <!-- prettier-ignore-start -->
 [github.com/settings/personal-access-tokens]: https://github.com/settings/personal-access-tokens
 [Decathlon/wiki-page-creator-action#11]: https://github.com/Decathlon/wiki-page-creator-action/issues/11
+[supported markup languages]: https://github.com/github/markup#markups
 <!-- prettier-ignore-end -->
