@@ -48,6 +48,10 @@ jobs:
           GH_NAME: actions[bot]
 ```
 
+☝ This workflow will mirror the `wiki/` folder in your GitHub repository to the
+`user/repo.wiki.git` Git repo that houses the wiki documentation! You can use
+any of the [supported markup languages] like MediaWiki, Markdown, or AsciiDoc.
+
 <img align="right" alt="Screenshot of 'Create the first page' button" src="https://i.imgur.com/ABKIS4h.png" />
 
 ⚠️ You must create a dummy page manually! This is what initially creates the
