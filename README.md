@@ -1,5 +1,6 @@
 <!--
 Copyright 2023 Andrew Chen Wang
+Copyright 2023 Jacob Hummer
 SPDX-License-Identifier: Apache-2.0
 -->
 
@@ -29,31 +30,24 @@ Add a GitHub Actions workflow file to your `.github/workflows/` folder similar
 to the example shown below.
 
 ```yml
-name: Wiki
+name: Publish wiki
 on:
   push:
     branches: [main]
-    paths: [wiki/**, .github/workflows/wiki.yml]
+    paths:
+      - wiki/**
+      - .github/workflows/publish-wiki.yml
 concurrency:
-  group: wiki
+  group: publish-wiki
   cancel-in-progress: true
 permissions:
   contents: write
 jobs:
-  wiki:
+  publish-wiki:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: Andrew-Chen-Wang/github-wiki-action@v3
-        # ⚠️ We use the env: key to provide our inputs! See #27.
-        env:
-          # Make sure this has a slash at the end! We use wiki/ by default.
-          WIKI_DIR: my-octocat-wiki/
-          # You MUST manually pass in the GitHub token.
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # These are currently REQUIRED options
-          GH_MAIL: actions@users.noreply.github.com
-          GH_NAME: actions[bot]
+      - uses: Andrew-Chen-Wang/github-wiki-action@v4
 ```
 
 ☝ This workflow will mirror the `wiki/` folder in your GitHub repository to the
@@ -66,9 +60,9 @@ any of the [supported markup languages] like MediaWiki, Markdown, or AsciiDoc.
 GitHub wiki Git-based storage backend that we then push to in this Action.
 
 After creating your workflow file, now all you need is to put your Markdown
-files in a `wiki/` folder (or whatever you set the `WIKI_DIR` option to) and
-commit them to your default branch to trigger the workflow (or whatever other
-trigger you set up).
+files in a `wiki/` folder (or whatever you set the `wiki` option to) and commit
+them to your default branch to trigger the workflow (or whatever other trigger
+you set up).
 
 💡 Each page has an auto-generated title. It is derived from the filename by
 replacing every `-` (dash) character with a space. Name your files accordingly.
@@ -94,35 +88,54 @@ workflow `.yml` file) you'll always need to use a GitHub PAT.
 
 ### Options
 
-⚠️ This action uses `env:` to supply these options, not `with:`!
+- **`repository`:** The repository housing the wiki. Use this if you're
+  publishing to a wiki that's not the current repository. You can change the
+  GitHub server with the `github-server-url` input. Default is
+  `${{ github.repository }}`.
 
-- **`GH_TOKEN`:** The GitHub API token to use. This is usually
-  `${{ secrets.GITHUB_TOKEN }}` or `${{ github.token }}` (they are the same).
-  This is **required**.
+- **`token`:** `${{ github.token }}` is the default. This token is used when
+  cloning and pushing wiki changes.
 
-- **`GH_MAIL`:** You must specify an email address to be associated with the
-  commit that we make to the wiki. This is **required**.
+- **`path`:** The directory to use for your wiki contents. Default `wiki/`.
 
-- **`GH_NAME`:** In addition to an email, you must also specify a username to
-  tie to the commit that we make. This is **required**.
+- **`commit-message`:** The message to use when committing new content. Default
+  is `Update wiki ${{ github.sha }}`. You probably don't need to change this,
+  since this only applies if you look really closely in your wiki.
 
-- **`WIKI_DIR`:** This is the directory to process and publish to the wiki.
-  Usually it's something like `wiki/` or `docs/`. The default is `wiki/`.
+- **`ignore`:** A multiline list of files that should be ignored when committing
+  and pushing to the remote wiki. Each line is a pattern like `.gitignore`. Make
+  sure these paths are relative to the path option! The default is none.
 
-- **`EXCLUDED_FILES`:** The files or directories you want to exclude. This _can_
-  be a glob pattern. By default, we include everything.
+- **`dry-run`:** Whether or not to actually attempt to push changes back to the
+  wiki itself. If this is set to `true`, we instead print the remote URL and do
+  not push to the remote wiki. The default is `false`. This is useful for
+  testing.
 
-- **`REPO`:** The repository to push to. This is useful if you want to push to a
-  different repository than the one that houses the workflow file. This should
-  be in the format `owner/repo`. The default is `${{ github.repository }}` (the
-  current repo).
+### Preprocessing
 
-- **`WIKI_PUSH_MESSAGE`:** The commit message to use when pushing to the wiki.
-  This is useful if you want to customize the commit message. The default is the
-  latest commit message from the main Git repo.
+You may wish to strip the `[link](page.md)` `.md` suffix from your links to make
+them viewable in GitHub source view (with the `.md`) _as well as_ in GitHub wiki
+(without the `.md`; pretty URLs!). You can use a preprocessing action like
+[Strip MarkDown extensions from links action] to remove those `.md` suffixes
+before using this action. Here's an example:
+
+```yml
+publish-wiki:
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v3
+    - uses: impresscms-dev/strip-markdown-extensions-from-links-action@v1.0.0
+      with:
+        path: wiki
+    - uses: Andrew-Chen-Wang/github-wiki-action@v4
+```
+
+❤️ If you have an awesome preprocessor action that you want to add here, let us
+know! We'd love to add an example.
 
 <!-- prettier-ignore-start -->
 [github.com/settings/personal-access-tokens]: https://github.com/settings/personal-access-tokens
 [Decathlon/wiki-page-creator-action#11]: https://github.com/Decathlon/wiki-page-creator-action/issues/11
 [supported markup languages]: https://github.com/github/markup#markups
+[Strip MarkDown extensions from links action]: https://github.com/marketplace/actions/strip-markdown-extensions-from-links-action
 <!-- prettier-ignore-end -->
