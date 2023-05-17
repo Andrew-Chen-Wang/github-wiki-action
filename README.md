@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0
 <!-- prettier-ignore -->
 [Our wiki](https://github.com/Andrew-Chen-Wang/github-wiki-action/wiki)
 | [Projects that use this](https://github.com/Andrew-Chen-Wang/github-wiki-action/network/dependents)
-| [v3 ➡️ v4 migration guide](https://github.com/Andrew-Chen-Wang/github-wiki-action/discussions/50)
+| [v4 release notes](https://github.com/Andrew-Chen-Wang/github-wiki-action/releases/tag/v4.0.0)
 
 </div>
 
