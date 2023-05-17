@@ -88,6 +88,12 @@ workflow `.yml` file) you'll always need to use a GitHub PAT.
 
 ### Options
 
+- **`strategy`:** Select from `clone` or `init` to determine which method to use
+  to push changes to the GitHub wiki. `clone` will clone the `.wiki.git` repo
+  and add an additional commit. `init` will create a new repo with a single
+  commit and force push to the `.wiki.git`. `init` involves a force-push! The
+  default is `clone`.
+
 - **`repository`:** The repository housing the wiki. Use this if you're
   publishing to a wiki that's not the current repository. You can change the
   GitHub server with the `github-server-url` input. Default is
@@ -114,6 +120,22 @@ workflow `.yml` file) you'll always need to use a GitHub PAT.
   wiki itself. If this is set to `true`, we instead print the remote URL and do
   not push to the remote wiki. The default is `false`. This is useful for
   testing.
+
+#### `strategy:` option
+
+There are some specific usecases where using `strategy: init` might be better
+than the default `strategy: clone`.
+
+1. **Your wiki is enormous.** And I don't mean in terms of text. Text is nothing
+   compared with images. If your wiki has a lot of included images, then you
+   probably don't want to store the complete history of those large binary
+   files. Instead, you can use `strategy: init` to create a single commit each
+   time.
+
+2. **You prefer the "deploy" semantics.** If you just like the feel of having
+   your GitHub wiki act more like GitHub Pages, that's great! You can `--force`
+   push using `strategy: init` on each wiki deployment and none of that pesky
+   history will be saved.
 
 ### Preprocessing
 

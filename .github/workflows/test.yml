@@ -6,14 +6,14 @@ on:
   push:
     branches: [master]
     paths:
-      - "*.sh"
+      - src/**
       - action.yml
       - wiki/**
       - .github/workflows/test.yml
   pull_request:
     branches: [master]
     paths:
-      - "*.sh"
+      - src/**
       - action.yml
       - wiki/**
       - .github/workflows/test.yml
@@ -30,8 +30,15 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
-      - uses: ./
+      - name: ./:clone
+        uses: ./
         with:
+          strategy: clone
+          dry-run: true
+      - name: ./:init
+        uses: ./
+        with:
+          strategy: init
           dry-run: true
   test-master:
     if: github.ref_name == 'master'
