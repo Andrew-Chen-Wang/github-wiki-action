@@ -7,6 +7,12 @@ SPDX-License-Identifier: Apache-2.0
 
 📖 GitHub Action to sync a folder to the GitHub wiki
 
+<div align="center">
+
+![](https://user-images.githubusercontent.com/61068799/231881220-2915f956-dbdb-4eee-8807-4eba9537523f.png)
+
+</div>
+
 📂 Keep your dev docs in sync with your code \
 💡 Inspired by [Decathlon/wiki-page-creator-action#11] \
 🔁 Able to open PRs with docs updates \
