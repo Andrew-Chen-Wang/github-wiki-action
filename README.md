@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
 🗂️ Use the fancy GitHub wiki reader view \
 💡 Inspired by [Decathlon/wiki-page-creator-action#11]
 
-## Installation
+## Usage
 
 ![GitHub Actions](https://img.shields.io/static/v1?style=for-the-badge&message=GitHub+Actions&color=2088FF&logo=GitHub+Actions&logoColor=FFFFFF&label=)
 ![GitHub](https://img.shields.io/static/v1?style=for-the-badge&message=GitHub&color=181717&logo=GitHub&logoColor=FFFFFF&label=)
