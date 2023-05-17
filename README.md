@@ -138,4 +138,5 @@ know! We'd love to add an example.
 [Decathlon/wiki-page-creator-action#11]: https://github.com/Decathlon/wiki-page-creator-action/issues/11
 [supported markup languages]: https://github.com/github/markup#markups
 [Strip MarkDown extensions from links action]: https://github.com/marketplace/actions/strip-markdown-extensions-from-links-action
+[PAT]: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
 <!-- prettier-ignore-end -->
