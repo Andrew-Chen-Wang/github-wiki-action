@@ -48,9 +48,9 @@ jobs:
 GitHub wiki Git-based storage backend that we then push to in this Action.
 
 After creating your workflow file, now all you need is to put your Markdown
-files in a `wiki/` folder (or whatever you set the `WIKI_DIR` option to) and
-commit them to your default branch to trigger the workflow (or whatever other
-trigger you set up).
+files in a `wiki/` folder (or whatever you set the `wiki` option to) and commit
+them to your default branch to trigger the workflow (or whatever other trigger
+you set up).
 
 💡 Each page has an auto-generated title. It is derived from the filename by
 replacing every `-` (dash) character with a space. Name your files accordingly.
