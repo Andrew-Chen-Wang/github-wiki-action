@@ -8,12 +8,20 @@ SPDX-License-Identifier: Apache-2.0
 
 📖 GitHub Action to sync a folder to the GitHub wiki
 
-📂 Keep your dev docs in sync with your code \
-🔁 Able to open PRs with docs updates \
-🗂️ Use the fancy GitHub wiki reader view \
-💡 Inspired by [Decathlon/wiki-page-creator-action#11]
+<div align="center">
 
-## Installation
+![](https://user-images.githubusercontent.com/61068799/231881220-2915f956-dbdb-4eee-8807-4eba9537523f.png)
+
+</div>
+
+📂 Keep your dev docs in sync with your code \
+💡 Inspired by [Decathlon/wiki-page-creator-action#11] \
+🔁 Able to open PRs with docs updates \
+✨ Use the fancy GitHub wiki reader UI for docs \
+🌐 Works across repositories (with a [PAT]) \
+💻 Supports `runs-on: windows-*`
+
+## Usage
 
 ![GitHub Actions](https://img.shields.io/static/v1?style=for-the-badge&message=GitHub+Actions&color=2088FF&logo=GitHub+Actions&logoColor=FFFFFF&label=)
 ![GitHub](https://img.shields.io/static/v1?style=for-the-badge&message=GitHub&color=181717&logo=GitHub&logoColor=FFFFFF&label=)
@@ -41,6 +49,10 @@ jobs:
       - uses: actions/checkout@v3
       - uses: Andrew-Chen-Wang/github-wiki-action@v4
 ```
+
+☝ This workflow will mirror the `wiki/` folder in your GitHub repository to the
+`user/repo.wiki.git` Git repo that houses the wiki documentation! You can use
+any of the [supported markup languages] like MediaWiki, Markdown, or AsciiDoc.
 
 <img align="right" alt="Screenshot of 'Create the first page' button" src="https://i.imgur.com/ABKIS4h.png" />
 
@@ -124,5 +136,7 @@ know! We'd love to add an example.
 <!-- prettier-ignore-start -->
 [github.com/settings/personal-access-tokens]: https://github.com/settings/personal-access-tokens
 [Decathlon/wiki-page-creator-action#11]: https://github.com/Decathlon/wiki-page-creator-action/issues/11
+[supported markup languages]: https://github.com/github/markup#markups
 [Strip MarkDown extensions from links action]: https://github.com/marketplace/actions/strip-markdown-extensions-from-links-action
+[PAT]: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
 <!-- prettier-ignore-end -->
