@@ -4,14 +4,14 @@
 name: Test
 on:
   push:
-    branches: [main]
+    branches: [master]
     paths:
       - src/**
       - action.yml
       - wiki/**
       - .github/workflows/test.yml
   pull_request:
-    branches: [main]
+    branches: [master]
     paths:
       - src/**
       - action.yml
