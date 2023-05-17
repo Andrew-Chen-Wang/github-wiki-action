@@ -33,8 +33,8 @@ jobs:
       - uses: ./
         with:
           dry-run: true
-  test-main:
-    if: github.ref_name == 'main'
+  test-master:
+    if: github.ref_name == 'master'
     needs: test
     runs-on: ubuntu-latest
     steps:
