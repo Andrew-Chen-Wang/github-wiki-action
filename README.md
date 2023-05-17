@@ -94,6 +94,11 @@ workflow `.yml` file) you'll always need to use a GitHub PAT.
   and pushing to the remote wiki. Each line is a pattern like `.gitignore`. Make
   sure these paths are relative to the path option! The default is none.
 
+- **`dry-run`:** Whether or not to actually attempt to push changes back to the
+  wiki itself. If this is set to `true`, we instead print the remote URL and do
+  not push to the remote wiki. The default is `false`. This is useful for
+  testing.
+
 <!-- prettier-ignore-start -->
 [github.com/settings/personal-access-tokens]: https://github.com/settings/personal-access-tokens
 [Decathlon/wiki-page-creator-action#11]: https://github.com/Decathlon/wiki-page-creator-action/issues/11
