@@ -25,6 +25,13 @@ inputs:
       the github-server-url input. Default is github.repository.
     required: true
     default: ${{ github.repository }}
+  github-server-url:
+    description: >-
+      An alternate https://github.com URL, usually for GitHub Enterprise
+      deployments under your own domain. Default is github.server_url (usually
+      https://github.com).
+    required: true
+    default: ${{ github.server_url }}
   token:
     description: >-
       github.token is the default. This token is used when cloning and pushing
@@ -65,6 +72,7 @@ runs:
       env:
         INPUT_STRATEGY: ${{ inputs.strategy }}
         INPUT_REPOSITORY: ${{ inputs.repository }}
+        INPUT_GITHUB_SERVER_URL: ${{ inputs.github-server-url }}
         INPUT_TOKEN: ${{ inputs.token }}
         INPUT_PATH: ${{ inputs.path }}
         INPUT_COMMIT_MESSAGE: ${{ inputs.commit-message }}

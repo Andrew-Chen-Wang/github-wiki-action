@@ -99,6 +99,10 @@ workflow `.yml` file) you'll always need to use a GitHub PAT.
   GitHub server with the `github-server-url` input. Default is
   `${{ github.repository }}`.
 
+- **`github-server-url`:** An alternate `https://github.com` URL, usually for
+  GitHub Enterprise deployments under your own domain. Default is
+  `${{ github.server_url }}` (usually `https://github.com`).
+
 - **`token`:** `${{ github.token }}` is the default. This token is used when
   cloning and pushing wiki changes.
 
