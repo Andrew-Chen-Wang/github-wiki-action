@@ -65,7 +65,7 @@ any of the [supported markup languages] like MediaWiki, Markdown, or AsciiDoc.
 GitHub wiki Git-based storage backend that we then push to in this Action.
 
 After creating your workflow file, now all you need is to put your Markdown
-files in a `wiki/` folder (or whatever you set the `wiki` option to) and commit
+files in a `wiki/` folder (or whatever you set the `path` option to) and commit
 them to your default branch to trigger the workflow (or whatever other trigger
 you set up).
 
