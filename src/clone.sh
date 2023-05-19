@@ -1,7 +1,9 @@
 #!/bin/bash
 # Copyright 2023 Jacob Hummer
 # SPDX-License-Identifier: Apache-2.0
-set -ex
+set -e
+export PS4="::debug::$PS4"
+set -x
 
 # We overwrite the $GITHUB_* environment variables with user-provided ones.
 # GitHub Actions normally provides a bunch of $GITHUB_* env vars. These can
