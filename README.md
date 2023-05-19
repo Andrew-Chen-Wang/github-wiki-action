@@ -59,6 +59,13 @@ jobs:
 `user/repo.wiki.git` Git repo that houses the wiki documentation! You can use
 any of the [supported markup languages] like MediaWiki, Markdown, or AsciiDoc.
 
+🔑 In order to successfully push to the `.wiki.git` Git repository that backs
+the wiki tab, we need the `contents: write` permission! Make sure you have
+something like shown above either for your entire workflow, or just for one
+particular job. This will give the auto-generated `${{ github.token }}` that we
+use by default permission to push to the `.wiki.git` repo of the repository that
+the action runs on.
+
 <img align="right" alt="Screenshot of 'Create the first page' button" src="https://i.imgur.com/ABKIS4h.png" />
 
 ⚠️ You must create a dummy page manually! This is what initially creates the
@@ -73,23 +80,6 @@ you set up).
 replacing every `-` (dash) character with a space. Name your files accordingly.
 The `Home.md` file will automatically become the homepage, not `README.md`. This
 is specific to GitHub wikis.
-
-### GitHub token
-
-This actions needs a GitHub token that can write to the GitHub wiki of the
-selected repository. By default, the `${{ github.token }}` you are given only
-offers **read** permissions to the current GitHub repository. You will need to
-either:
-
-1. Provide a custom GitHub PAT that has `contents: write` permissions. This can
-   be generated from [github.com/settings/personal-access-tokens].
-2. Upgrade the `${{ github.token }}` using the GitHub Actions' `permissions:`
-   directive. This can be done by adding `permissions: { contents: write }` to
-   the top level fields **or** to the job's fields. You can see examples of both
-   of these above.
-
-⚠️ If you're pushing to another repository (**not** the one that houses the
-workflow `.yml` file) you'll always need to use a GitHub PAT.
 
 ### Options
 
@@ -164,8 +154,41 @@ publish-wiki:
 ❤️ If you have an awesome preprocessor action that you want to add here, let us
 know! We'd love to add an example.
 
+### Cross-repo wikis
+
+You _can_ use this action to deploy your octocat/mega-docs repository to the
+octocat/mega-project repository's wiki tab! You just need to:
+
+1. Create a custom GitHub Personal Access Token with the permissions to push to
+   the octocat/mega-project repository. That's the target repo where your wiki
+   pages will be pushed to the `.wiki.git`.
+2. In the octocat/mega-docs repo (the source code for the wiki), you need to set
+   the `repository:` option to `repository: octocat/mega-project` to tell the
+   action to push there.
+3. You need to set the `token:` option to the Personal Access Token that you
+   created with the ability to push to the wiki Git repo. You can use repository
+   secrets for this! Something like `token: ${{ secrets.MY_TOKEN }}` is good!
+
+Here's an example of the octocat/mega-docs repo that will push the contents of
+the root folder (`./`) to the octocat/mega-project repo's wiki tab!
+
+```yml
+on:
+  push:
+    branches: [main]
+jobs:
+  publish-wiki:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: Andrew-Chen-Wang/github-wiki-action@v4
+        with:
+          token: ${{ secrets.MEGA_PROJECT_GITHUB_TOKEN }}
+          repository: octocat/mega-project
+          path: .
+```
+
 <!-- prettier-ignore-start -->
-[github.com/settings/personal-access-tokens]: https://github.com/settings/personal-access-tokens
 [Decathlon/wiki-page-creator-action#11]: https://github.com/Decathlon/wiki-page-creator-action/issues/11
 [supported markup languages]: https://github.com/github/markup#markups
 [Strip MarkDown extensions from links action]: https://github.com/marketplace/actions/strip-markdown-extensions-from-links-action
