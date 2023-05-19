@@ -1,7 +1,18 @@
 #!/bin/bash
 # Copyright 2023 Jacob Hummer
 # SPDX-License-Identifier: Apache-2.0
-set -ex
+
+# Remember, this enables fail-fast mode! We want this for scripts. If a command
+# returns a non-zero exit code, this -e makes us exit then-and-there.
+set -e
+# When a job fails, you can re-run it with debug mode enabled. This is exposed
+# to scripts via the ${{ runner.debug }} or $RUNNER_DEBUG variable. Here, we
+# use the -z test to see if the $RUNNER_DEBUG exists. If so, we use the -x flag
+# to print a '+ cmd arg1 arg2' of each command that's run in the script. This
+# helps with debugging what commands and $VAR expansions are actually happening.
+if [[ -z $RUNNER_DEBUG ]]; then
+  set -x
+fi
 
 # We overwrite the $GITHUB_* environment variables with user-provided ones.
 # GitHub Actions normally provides a bunch of $GITHUB_* env vars. These can
