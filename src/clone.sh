@@ -1,10 +1,7 @@
 #!/bin/bash
 # Copyright 2023 Jacob Hummer
 # SPDX-License-Identifier: Apache-2.0
-set -e
-if [[ -n $RUNNER_DEBUG ]]; then
-  set -x
-fi
+set -ex
 
 # We overwrite the $GITHUB_* environment variables with user-provided ones.
 # GitHub Actions normally provides a bunch of $GITHUB_* env vars. These can
