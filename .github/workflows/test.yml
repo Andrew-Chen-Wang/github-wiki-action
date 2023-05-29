@@ -23,7 +23,7 @@ concurrency:
 permissions:
   contents: write
 jobs:
-  check:
+  test-shellcheck:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
