@@ -44,7 +44,7 @@ export GH_HOST="${GITHUB_SERVER_URL#*//}"
 # the base folder or "root" of the $GIT_DIR's repo should be. Normally, this
 # would be the $PWD, but we want to set it to the $INPUT_PATH which is
 # probably a subfolder of the project somwhere!
-export GIT_DIR=$(mktemp -d)
+export GIT_DIR && GIT_DIR=$(mktemp -d)
 export GIT_WORK_TREE="$INPUT_PATH"
 # This is just good practice to clean up after yourself. It's not needed per-se.
 # This is a one-off Actions runner that will delete every part of itself after
