@@ -23,6 +23,11 @@ concurrency:
 permissions:
   contents: write
 jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ludeeus/action-shellcheck@master
   test:
     strategy:
       matrix:
@@ -42,7 +47,7 @@ jobs:
           dry-run: true
   test-master:
     if: github.ref_name == 'master'
-    needs: test
+    needs: [check, test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
