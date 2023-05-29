@@ -7,10 +7,10 @@
 set -e
 # When a job fails, you can re-run it with debug mode enabled. This is exposed
 # to scripts via the ${{ runner.debug }} or $RUNNER_DEBUG variable. Here, we
-# use the -z test to see if the $RUNNER_DEBUG exists. If so, we use the -x flag
+# use the -n test to see if the $RUNNER_DEBUG exists. If so, we use the -x flag
 # to print a '+ cmd arg1 arg2' of each command that's run in the script. This
 # helps with debugging what commands and $VAR expansions are actually happening.
-if [[ -z $RUNNER_DEBUG ]]; then
+if [[ -n $RUNNER_DEBUG ]]; then
   set -x
 fi
 
