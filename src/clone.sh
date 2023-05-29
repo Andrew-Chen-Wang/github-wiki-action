@@ -10,7 +10,9 @@ set -e
 # use the -z test to see if the $RUNNER_DEBUG exists. If so, we use the -x flag
 # to print a '+ cmd arg1 arg2' of each command that's run in the script. This
 # helps with debugging what commands and $VAR expansions are actually happening.
+# We also print all env vars for debugging.
 if [[ -z $RUNNER_DEBUG ]]; then
+  printenv
   set -x
 fi
 
