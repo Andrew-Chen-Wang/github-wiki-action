@@ -5,23 +5,20 @@ name: Test
 on:
   push:
     branches: [master]
-    paths:
-      - src/**
-      - action.yml
-      - wiki/**
-      - .github/workflows/test.yml
+    paths-ignore:
+      - LICENSE
+      - README.md
+      - .github/**
+      - "!.github/workflows/test.yml"
   pull_request:
-    branches: [master]
-    paths:
-      - src/**
-      - action.yml
-      - wiki/**
-      - .github/workflows/test.yml
+    paths-ignore:
+      - LICENSE
+      - README.md
+      - .github/**
+      - "!.github/workflows/test.yml"
 concurrency:
-  group: test-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref_name }}
   cancel-in-progress: true
-permissions:
-  contents: write
 jobs:
   test-shellcheck:
     runs-on: ubuntu-latest
@@ -47,7 +44,9 @@ jobs:
           dry-run: true
   test-master:
     if: github.ref_name == 'master'
-    needs: [check, test]
+    needs: test
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
