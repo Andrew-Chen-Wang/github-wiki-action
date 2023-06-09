@@ -115,3 +115,4 @@ fi
 # to that 'github.com' hostname! We aren't using -u or -f here since there
 # shouldn't be a need.
 git push origin master
+echo "wiki_url=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/wiki" >>"$GITHUB_OUTPUT"
