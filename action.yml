@@ -64,10 +64,18 @@ inputs:
       push to the remote wiki. The default is false. This is useful for testing.
     required: true
     default: false
+outputs:
+  wiki_url:
+    description: >-
+      The HTTP URL that points to the deployed repository's wiki tab. This is
+      essentially the concatenation of github.server_url, github.repository, and
+      the /wiki page.
+    value: ${{ steps.main.outputs.wiki_url }}
 runs:
   using: composite
   steps:
-    - run: '"${GITHUB_ACTION_PATH%/}/src/$INPUT_STRATEGY.sh"'
+    - id: main
+      run: '"${GITHUB_ACTION_PATH%/}/src/$INPUT_STRATEGY.sh"'
       shell: bash
       env:
         INPUT_STRATEGY: ${{ inputs.strategy }}

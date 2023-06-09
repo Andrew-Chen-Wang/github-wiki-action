@@ -81,7 +81,7 @@ replacing every `-` (dash) character with a space. Name your files accordingly.
 The `Home.md` file will automatically become the homepage, not `README.md`. This
 is specific to GitHub wikis.
 
-### Options
+### Inputs
 
 - **`strategy`:** Select from `clone` or `init` to determine which method to use
   to push changes to the GitHub wiki. `clone` will clone the `.wiki.git` repo
@@ -116,7 +116,7 @@ is specific to GitHub wikis.
   not push to the remote wiki. The default is `false`. This is useful for
   testing.
 
-#### `strategy:` option
+#### `strategy:` input
 
 There are some specific usecases where using `strategy: init` might be better
 than the default `strategy: clone`.
@@ -131,6 +131,12 @@ than the default `strategy: clone`.
    your GitHub wiki act more like GitHub Pages, that's great! You can `--force`
    push using `strategy: init` on each wiki deployment and none of that pesky
    history will be saved.
+
+### Outputs
+
+- **`wiki_url`:** The HTTP URL that points to the deployed repository's wiki
+  tab. This is essentially the concatenation of `${{ github.server_url }}`,
+  `${{ github.repository }}`, and the `/wiki` page.
 
 ### Preprocessing
 

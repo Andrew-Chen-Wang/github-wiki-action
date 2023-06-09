@@ -37,3 +37,4 @@ if [[ $INPUT_DRY_RUN == true ]]; then
 fi
 
 git push origin master
+echo "wiki_url=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/wiki" >>"$GITHUB_OUTPUT"
