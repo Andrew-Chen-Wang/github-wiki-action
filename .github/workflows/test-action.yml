@@ -17,12 +17,30 @@ on:
       - README.md
       - .github/**
       - "!.github/workflows/test-action.yml"
-concurrency: ${{ github.workflow }}
 jobs:
-  test-action:
+  test-action-clone:
+    concurrency: ${{ github.workflow }}
     permissions:
       contents: write
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
       - uses: ./
+  test-action-init:
+    concurrency: ${{ github.workflow }}
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./
+        with:
+          strategy: init
