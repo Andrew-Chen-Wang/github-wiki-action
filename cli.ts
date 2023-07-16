@@ -26,14 +26,17 @@ const serverURL = core.getInput("github_server_url");
 const repo = core.getInput("repository");
 const wikiGitURL = `${serverURL}/${repo}.wiki.git`;
 const workspacePath = process.cwd();
-process.chdir(temporaryDirectory());
+const d = temporaryDirectory();
+process.chdir(d);
+
+console.log($.cwd, process.cwd(), resolve());
 
 process.env.GH_TOKEN = core.getInput("token");
 process.env.GH_HOST = new URL(core.getInput("github_server_url")).host;
 await $`gh auth setup-git`;
 
 if (core.getInput("strategy") === "clone") {
-  await $`git config --global --add safe.directory ${$.cwd}`;
+  await $`git config --global --add safe.directory ${process.cwd()}`;
   await $`git clone ${wikiGitURL} .`;
 } else if (core.getInput("strategy") === "init") {
   await $`git init -b master`;
