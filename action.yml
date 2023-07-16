@@ -94,4 +94,4 @@ runs:
         INPUT_COMMIT_MESSAGE: ${{ inputs.commit-message }}
         INPUT_IGNORE: ${{ inputs.ignore }}
         INPUT_DRY_RUN: ${{ inputs.dry-run }}
-        INPUT_PREPROCESS_LINKS: ${{ inputs.preprocess-links }}
+        INPUT_PREPROCESS: ${{ inputs.preprocess }}
