@@ -75,4 +75,4 @@ if (["true", "1"].includes(core.getInput("dry_run"))) {
 }
 
 const wikiURL = `${serverURL}/${repo}/wiki`;
-await appendFile(`wiki_url=${wikiURL}`, process.env.GITHUB_OUTPUT!);
+await appendFile(process.env.GITHUB_OUTPUT!, `wiki_url=${wikiURL}`);
