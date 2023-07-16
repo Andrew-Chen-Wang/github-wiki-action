@@ -63,14 +63,6 @@ inputs:
       push to the remote wiki. The default is false. This is useful for testing.
     required: true
     default: false
-  preprocess:
-    description: >-
-      If this option is true, we will preprocess the wiki to move the README.md
-      to Home.md as well as rewriting all .md links to be bare links. This helps
-      ensure that the Markdown works in source control as well as the wiki. The
-      default is true.
-    required: true
-    default: true
 outputs:
   wiki_url:
     description: >-
@@ -82,7 +74,7 @@ runs:
   using: composite
   steps:
     - id: main
-      run: '"${GITHUB_ACTION_PATH%/}/cliw"'
+      run: '"${GITHUB_ACTION_PATH%/}/src/$INPUT_STRATEGY.sh"'
       shell: bash
       env:
         INPUT_STRATEGY: ${{ inputs.strategy }}
@@ -93,4 +85,3 @@ runs:
         INPUT_COMMIT_MESSAGE: ${{ inputs.commit-message }}
         INPUT_IGNORE: ${{ inputs.ignore }}
         INPUT_DRY_RUN: ${{ inputs.dry-run }}
-        INPUT_PREPROCESS: ${{ inputs.preprocess }}
