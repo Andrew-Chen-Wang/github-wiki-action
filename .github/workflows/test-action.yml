@@ -46,7 +46,7 @@ jobs:
           strategy: init
           dry-run: true
   test-action-real:
-    concurrency: ${{ github.workflow }}
+    concurrency: ${{ github.workflow }}-real
     permissions:
       contents: write
     runs-on: ubuntu-latest
