@@ -64,11 +64,12 @@ inputs:
       push to the remote wiki. The default is false. This is useful for testing.
     required: true
     default: false
-  preprocess-links:
+  preprocess:
     description: >-
-      Whether or not to preprocess links before pushing to the wiki. This will
-      not mutate the source tree. It replaces all links to .md files with links
-      to the corresponding wiki page. The default is true.
+      If this option is true, we will preprocess the wiki to move the README.md
+      to Home.md as well as rewriting all .md links to be bare links. This helps
+      ensure that the Markdown works in source control as well as the wiki. The
+      default is true.
     required: true
     default: true
 outputs:
