@@ -1,7 +1,6 @@
 # Copyright 2023 Andrew Chen Wang
 # Copyright 2023 Jacob Hummer
 # SPDX-License-Identifier: Apache-2.0
-
 name: GitHub Wiki Action
 author: Andrew Chen Wang <acwangpython@gmail.com>
 description: 📖 Deploy docs from your source tree to the GitHub wiki
