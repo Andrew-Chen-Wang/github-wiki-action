@@ -18,20 +18,15 @@ import { remark } from "npm:remark@^14.0.3";
 import { visit } from "npm:unist-util-visit@^5.0.0";
 import { resolve } from "node:path";
 
+core.startGroup("process.env");
+console.table(process.env);
+core.endGroup();
+
 const serverURL = core.getInput("github_server_url");
 const repo = core.getInput("repository");
 const wikiGitURL = `${serverURL}/${repo}.wiki.git`;
-const path = resolve(core.getInput("path"));
+const workspacePath = process.cwd();
 process.chdir(temporaryDirectory());
-await copy(path, process.cwd());
-
-console.table({
-  serverURL,
-  repo,
-  wikiGitURL,
-  path,
-  "process.cwd()": process.cwd(),
-});
 
 process.env.GH_TOKEN = core.getInput("token");
 process.env.GH_HOST = new URL(core.getInput("github_server_url")).host;
@@ -53,6 +48,7 @@ await $`git config user.name github-actions[bot]`;
 await $`git config user.email 41898282+github-actions[bot]@users.noreply.github.com`;
 
 await appendFile(".git/info/exclude", core.getInput("ignore"));
+await copy(resolve(workspacePath, core.getInput("path")), process.cwd());
 
 if (["true", "1"].includes(core.getInput("preprocess"))) {
   // https://github.com/nodejs/node/issues/39960
