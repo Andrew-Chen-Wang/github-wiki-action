@@ -52,7 +52,7 @@ await $`git config user.email 41898282+github-actions[bot]@users.noreply.github.
 await appendFile(".git/info/exclude", core.getInput("ignore"));
 await copy(resolve(workspacePath, core.getInput("path")), process.cwd());
 
-if (["true", "1"].includes(core.getInput("preprocess"))) {
+if (core.getBooleanInput("preprocess")) {
   // https://github.com/nodejs/node/issues/39960
   if (existsSync("README.md")) {
     await rename("README.md", "Home.md");
@@ -91,12 +91,11 @@ if (["true", "1"].includes(core.getInput("preprocess"))) {
 await $`git add -Av`;
 await $`git commit --allow-empty -m ${core.getInput("commit_message")}`;
 
-if (["true", "1"].includes(core.getInput("dry_run"))) {
+if (core.getBooleanInput("dry_run")) {
   await $`git show`;
   await $`git push -f origin master --dry-run`;
 } else {
   await $`git push -f origin master`;
 }
 
-const wikiURL = `${serverURL}/${repo}/wiki`;
-await appendFile(process.env.GITHUB_OUTPUT!, `wiki_url=${wikiURL}`);
+core.setOutput("wiki_url", `${serverURL}/${repo}/wiki`);
