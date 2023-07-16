@@ -40,7 +40,7 @@ await $`git config user.name github-actions[bot]`;
 await $`git config user.email 41898282+github-actions[bot]@users.noreply.github.com`;
 
 await appendFile(resolve($.cwd!, ".git/info/exclude"), core.getInput("ignore"));
-await copy(core.getInput("path"), $.cwd!, { recursive: true });
+await copy(core.getInput("path"), $.cwd!);
 
 function plugin() {
   function visitor(node: any) {
