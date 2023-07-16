@@ -73,7 +73,7 @@ if (["true", "1"].includes(core.getInput("preprocess_links"))) {
 }
 
 await $`git add -Av`;
-await $`git commit --allow-empty -m ${core.getInput("message")}`;
+await $`git commit --allow-empty -m ${core.getInput("commit_message")}`;
 
 if (["true", "1"].includes(core.getInput("dry_run"))) {
   await $`git show`;
