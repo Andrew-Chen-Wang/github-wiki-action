@@ -64,6 +64,13 @@ inputs:
       push to the remote wiki. The default is false. This is useful for testing.
     required: true
     default: false
+  preprocess-links:
+    description: >-
+      Whether or not to preprocess links before pushing to the wiki. This will
+      not mutate the source tree. It replaces all links to .md files with links
+      to the corresponding wiki page. The default is true.
+    required: true
+    default: true
 outputs:
   wiki_url:
     description: >-
@@ -75,7 +82,7 @@ runs:
   using: composite
   steps:
     - id: main
-      run: '"${GITHUB_ACTION_PATH%/}/src/$INPUT_STRATEGY.sh"'
+      run: '"${GITHUB_ACTION_PATH%/}/cliw"'
       shell: bash
       env:
         INPUT_STRATEGY: ${{ inputs.strategy }}
@@ -86,3 +93,4 @@ runs:
         INPUT_COMMIT_MESSAGE: ${{ inputs.commit-message }}
         INPUT_IGNORE: ${{ inputs.ignore }}
         INPUT_DRY_RUN: ${{ inputs.dry-run }}
+        INPUT_PREPROCESS_LINKS: ${{ inputs.preprocess-links }}
