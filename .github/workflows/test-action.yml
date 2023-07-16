@@ -49,7 +49,7 @@ jobs:
           dry-run: true
   test-action-master:
     if: github.ref_name == 'master'
-    needs: test
+    needs: [test-action-clone, test-action-init]
     permissions:
       contents: write
     runs-on: ubuntu-latest
