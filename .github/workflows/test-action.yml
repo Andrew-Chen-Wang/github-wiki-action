@@ -1,17 +1,18 @@
 # Copyright 2023 Jacob Hummer
 # SPDX-License-Identifier: Apache-2.0
-
-name: Test
+name: Test action
 on:
   push:
     branches: [master]
     paths-ignore:
+      - .gitignore
       - LICENSE
       - README.md
       - .github/**
       - "!.github/workflows/test.yml"
   pull_request:
     paths-ignore:
+      - .gitignore
       - LICENSE
       - README.md
       - .github/**
@@ -20,29 +21,33 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
   cancel-in-progress: true
 jobs:
-  test-shellcheck:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: ludeeus/action-shellcheck@master
-  test:
+  test-action-clone:
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
-      - name: ./:clone
+      - name: strategy=clone
         uses: ./
         with:
           strategy: clone
           dry-run: true
-      - name: ./:init
+  test-action-init:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: strategy=init
         uses: ./
         with:
           strategy: init
           dry-run: true
-  test-master:
+  test-action-master:
     if: github.ref_name == 'master'
     needs: test
     permissions:
