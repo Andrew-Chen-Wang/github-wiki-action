@@ -111,11 +111,6 @@ is specific to GitHub wikis.
   not push to the remote wiki. The default is `false`. This is useful for
   testing.
 
-- **`preprocess`:** If this option is true, we will preprocess the wiki to move
-  the `README.md` to `Home.md` as well as rewriting all `.md` links to be bare
-  links. This helps ensure that the Markdown works in source control as well as
-  the wiki. The default is true.
-
 #### `strategy:` input
 
 There are some specific usecases where using `strategy: init` might be better
@@ -137,6 +132,28 @@ than the default `strategy: clone`.
 - **`wiki_url`:** The HTTP URL that points to the deployed repository's wiki
   tab. This is essentially the concatenation of `${{ github.server_url }}`,
   `${{ github.repository }}`, and the `/wiki` page.
+
+### Preprocessing
+
+You may wish to strip the `[link](page.md)` `.md` suffix from your links to make
+them viewable in GitHub source view (with the `.md`) _as well as_ in GitHub wiki
+(without the `.md`; pretty URLs!). You can use a preprocessing action like
+[Strip MarkDown extensions from links action] to remove those `.md` suffixes
+before using this action. Here's an example:
+
+```yml
+publish-wiki:
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v3
+    - uses: impresscms-dev/strip-markdown-extensions-from-links-action@v1.0.0
+      with:
+        path: wiki
+    - uses: Andrew-Chen-Wang/github-wiki-action@v4
+```
+
+❤️ If you have an awesome preprocessor action that you want to add here, let us
+know! We'd love to add an example.
 
 ### Cross-repo wikis
 
@@ -172,24 +189,9 @@ jobs:
           path: .
 ```
 
-## Development
-
-![Deno](https://img.shields.io/static/v1?style=for-the-badge&message=Deno&color=000000&logo=Deno&logoColor=FFFFFF&label=)
-![GitHub Actions](https://img.shields.io/static/v1?style=for-the-badge&message=GitHub+Actions&color=2088FF&logo=GitHub+Actions&logoColor=FFFFFF&label=)
-
-This GitHub Action uses a self-downloaded version of Deno. See `cliw` for the
-`cli.ts` wrapper script that downloads the Deno binary and runs the TypeScript
-code. The main script itself is ~100 lines of code, so it's not too bad.
-
-ℹ Because the version of Deno is _pinned_, it's recommended to every-so-often
-bump it to the latest version.
-
-To test the action, open a PR! The `test-action.yml` workflow will run the code
-with `dry-run: true` as well as a real run! Yes, this does get tedious swapping
-between your IDE and the PR, but it's the easiest way to test the action.
-
 <!-- prettier-ignore-start -->
 [Decathlon/wiki-page-creator-action#11]: https://github.com/Decathlon/wiki-page-creator-action/issues/11
 [supported markup languages]: https://github.com/github/markup#markups
+[Strip MarkDown extensions from links action]: https://github.com/marketplace/actions/strip-markdown-extensions-from-links-action
 [PAT]: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
 <!-- prettier-ignore-end -->
