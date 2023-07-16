@@ -5,7 +5,7 @@ on:
   release:
     types: [released]
 concurrency:
-  group: update-tags
+  group: ${{ github.workflow }}
   cancel-in-progress: true
 permissions:
   contents: write
