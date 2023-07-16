@@ -17,7 +17,7 @@ on:
       - README.md
       - .github/**
       - "!.github/workflows/test-action.yml"
-concurrency: ${{ github.workflow }}-${{ github.ref_name }}
+concurrency: ${{ github.workflow }}
 jobs:
   test-action:
     permissions:
