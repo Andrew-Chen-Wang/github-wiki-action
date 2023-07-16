@@ -3,20 +3,20 @@
 name: Test action
 on:
   push:
-    branches: [master]
+    branches: "master"
     paths-ignore:
       - .gitignore
       - LICENSE
       - README.md
       - .github/**
-      - "!.github/workflows/test.yml"
+      - "!.github/workflows/test-action.yml"
   pull_request:
     paths-ignore:
       - .gitignore
       - LICENSE
       - README.md
       - .github/**
-      - "!.github/workflows/test.yml"
+      - "!.github/workflows/test-action.yml"
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
   cancel-in-progress: true
