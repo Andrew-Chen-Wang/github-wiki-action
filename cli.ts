@@ -11,19 +11,14 @@ import { remark } from "npm:remark@^14.0.3";
 import { visit } from "npm:unist-util-visit@^5.0.0";
 import { resolve } from "node:path";
 
-$.verbose = false;
-if (core.isDebug()) {
-  $.verbose = true;
-}
+console.table(process.env)
 
 const serverURL = core.getInput("github_server_url");
 const repo = core.getInput("repository");
 const wikiGitURL = `${serverURL}/${repo}.wiki.git`;
 $.cwd = temporaryDirectory();
 
-if (core.isDebug()) {
-  console.table({ serverURL, repo, wikiGitURL, "$.cwd": $.cwd });
-}
+console.table({ serverURL, repo, wikiGitURL, "$.cwd": $.cwd });
 
 process.env.GH_TOKEN = core.getInput("token");
 process.env.GH_HOST = new URL(core.getInput("github_server_url")).host;
@@ -51,10 +46,7 @@ function plugin() {
   function visitor(node: any) {
     if (/\.md$/.test(node.url)) {
       node.url = node.url.replace(/\.md$/, "");
-
-      if (core.isDebug()) {
-        console.log(`Rewrote to ${node.url}`);
-      }
+      console.log(`Rewrote to ${node.url}`);
     }
   }
   return (tree: any) => visit(tree, ["link", "linkReference"], visitor);
