@@ -29,10 +29,6 @@ process.env.GH_TOKEN = core.getInput("token");
 process.env.GH_HOST = new URL(core.getInput("github_server_url")).host;
 await $`gh auth setup-git`;
 
-// https://github.com/stefanzweifel/git-auto-commit-action/blob/master/action.yml#L35-L42
-await $`git config user.name github-actions[bot]`;
-await $`git config user.email 41898282+github-actions[bot]@users.noreply.github.com`;
-
 if (core.getInput("strategy") === "clone") {
   await $`git config --global --add safe.directory ${$.cwd}`;
   await $`git clone ${wikiGitURL} .`;
@@ -43,6 +39,10 @@ if (core.getInput("strategy") === "clone") {
 } else {
   throw new DOMException("Unknown strategy", "NotSupportedError");
 }
+
+// https://github.com/stefanzweifel/git-auto-commit-action/blob/master/action.yml#L35-L42
+await $`git config user.name github-actions[bot]`;
+await $`git config user.email 41898282+github-actions[bot]@users.noreply.github.com`;
 
 await appendFile(resolve($.cwd!, ".git/info/exclude"), core.getInput("ignore"));
 await copy(core.getInput("path"), $.cwd!, { recursive: true });
