@@ -17,11 +17,11 @@ on:
       - README.md
       - .github/**
       - "!.github/workflows/test-action.yml"
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
 jobs:
-  test-action-clone:
-    concurrency: ${{ github.workflow }}
-    permissions:
-      contents: write
+  test-action-clone-dry-run:
     strategy:
       fail-fast: false
       matrix:
@@ -30,10 +30,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: ./
-  test-action-init:
-    concurrency: ${{ github.workflow }}
-    permissions:
-      contents: write
+        with:
+          strategy: clone
+          dry-run: true
+  test-action-init-dry-run:
     strategy:
       fail-fast: false
       matrix:
@@ -44,3 +44,12 @@ jobs:
       - uses: ./
         with:
           strategy: init
+          dry-run: true
+  test-action-real:
+    concurrency: ${{ github.workflow }}
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./
