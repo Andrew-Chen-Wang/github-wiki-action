@@ -12,11 +12,6 @@ SPDX-License-Identifier: Apache-2.0
 
 ![](https://user-images.githubusercontent.com/61068799/231881220-2915f956-dbdb-4eee-8807-4eba9537523f.png)
 
-<!-- prettier-ignore -->
-[Our wiki](https://github.com/Andrew-Chen-Wang/github-wiki-action/wiki)
-| [Projects that use this](https://github.com/Andrew-Chen-Wang/github-wiki-action/network/dependents)
-| [v4 release notes](https://github.com/Andrew-Chen-Wang/github-wiki-action/releases/tag/v4.0.0)
-
 </div>
 
 📂 Keep your dev docs in sync with your code \
