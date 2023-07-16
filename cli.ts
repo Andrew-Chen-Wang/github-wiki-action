@@ -28,6 +28,7 @@ const wikiGitURL = `${serverURL}/${repo}.wiki.git`;
 const workspacePath = process.cwd();
 const d = temporaryDirectory();
 process.chdir(d);
+$.cwd = d;
 
 console.log($.cwd, process.cwd(), resolve());
 
