@@ -17,39 +17,9 @@ on:
       - README.md
       - .github/**
       - "!.github/workflows/test-action.yml"
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref_name }}
-  cancel-in-progress: true
+concurrency: ${{ github.workflow }}-${{ github.ref_name }}
 jobs:
-  test-action-clone:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v3
-      - name: strategy=clone
-        uses: ./
-        with:
-          strategy: clone
-          dry-run: true
-  test-action-init:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v3
-      - name: strategy=init
-        uses: ./
-        with:
-          strategy: init
-          dry-run: true
-  test-action-master:
-    if: github.ref_name == 'master'
-    needs: [test-action-clone, test-action-init]
+  test-action:
     permissions:
       contents: write
     runs-on: ubuntu-latest
