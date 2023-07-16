@@ -2,7 +2,8 @@
 // Copyright 2023 Jacob Hummer
 // SPDX-License-Identifier: Apache-2.0
 import process from "node:process";
-import { readFile, writeFile, cp, appendFile, readdir } from "node:fs/promises";
+import { readFile, writeFile, appendFile, readdir } from "node:fs/promises";
+import { copy } from "npm:fs-extra@^11.1.1"
 import * as core from "npm:@actions/core@^1.10.0";
 import { temporaryDirectory } from "npm:tempy@^3.1.0";
 import { $ } from "npm:zx@^7.2.2";
@@ -19,6 +20,10 @@ const serverURL = core.getInput("github_server_url");
 const repo = core.getInput("repository");
 const wikiGitURL = `${serverURL}/${repo}.wiki.git`;
 $.cwd = temporaryDirectory();
+
+if (core.isDebug()) {
+  console.table({ serverURL, repo, wikiGitURL, "$.cwd": $.cwd });
+}
 
 process.env.GH_TOKEN = core.getInput("token");
 process.env.GH_HOST = new URL(core.getInput("github_server_url")).host;
@@ -39,26 +44,32 @@ if (core.getInput("strategy") === "clone") {
   throw new DOMException("Unknown strategy", "NotSupportedError");
 }
 
-appendFile(resolve($.cwd!, ".git/info/exclude"), core.getInput("ignore"));
-cp(core.getInput("path"), $.cwd!, { recursive: true });
+await appendFile(resolve($.cwd!, ".git/info/exclude"), core.getInput("ignore"));
+await copy(core.getInput("path"), $.cwd!, { recursive: true });
 
 function plugin() {
   function visitor(node: any) {
     if (/\.md$/.test(node.url)) {
       node.url = node.url.replace(/\.md$/, "");
+
+      if (core.isDebug()) {
+        console.log(`Rewrote to ${node.url}`);
+      }
     }
   }
   return (tree: any) => visit(tree, ["link", "linkReference"], visitor);
 }
 
-for (const file of await readdir($.cwd!)) {
-  if (!/\.(?:md|markdown|mdown|mkdn|mkd|mdwn|mkdown|ron)$/.test(file)) {
-    continue;
-  }
+if (["true", "1"].includes(core.getInput("preprocess_links"))) {
+  for (const file of await readdir($.cwd!)) {
+    if (!/\.(?:md|markdown|mdown|mkdn|mkd|mdwn|mkdown|ron)$/.test(file)) {
+      continue;
+    }
 
-  let md = await readFile(resolve($.cwd!, file), "utf-8");
-  md = (await remark().use(plugin).process(md)).toString();
-  await writeFile(resolve($.cwd!, file), md);
+    let md = await readFile(resolve($.cwd!, file), "utf-8");
+    md = (await remark().use(plugin).process(md)).toString();
+    await writeFile(resolve($.cwd!, file), md);
+  }
 }
 
 await $`git add -Av`;
@@ -72,4 +83,4 @@ if (["true", "1"].includes(core.getInput("dry_run"))) {
 }
 
 const wikiURL = `${serverURL}/${repo}/wiki`;
-appendFile(`wiki_url=${wikiURL}`, process.env.GITHUB_OUTPUT!);
+await appendFile(`wiki_url=${wikiURL}`, process.env.GITHUB_OUTPUT!);
