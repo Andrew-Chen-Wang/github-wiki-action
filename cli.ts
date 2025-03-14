@@ -70,7 +70,7 @@ if (core.getBooleanInput("preprocess")) {
       }
 
       const x = node.url;
-      node.url = node.url.replace(mdRe, "");
+      node.url = node.url.replace(mdRe, "$2");
       if (new URL(node.url, "file:///-/").href === "file:///-/README") {
         node.url = "Home";
       }
