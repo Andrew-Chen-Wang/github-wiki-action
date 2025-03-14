@@ -59,7 +59,7 @@ if (core.getBooleanInput("preprocess")) {
     console.log("Moved README.md to Home.md");
   }
 
-  const mdRe = /\.(?:md|markdown|mdown|mkdn|mkd|mdwn|mkdown|ron)(#(?:[\!\$&'\(\)\*\+,;=a-zA-Z0-9\-._~:@\/?]|%[0-9a-fA-F]{2})*)?$/;
+  const mdRe = /\.(?:md|markdown|mdown|mkdn|mkd|mdwn|mkdown|ron)([:\/\?#\[\]@].*)?$/;
   const plugin = () => (tree: any) =>
     visit(tree, ["link", "linkReference"], (node: any) => {
       const matches = node.url?.match(mdRe)
