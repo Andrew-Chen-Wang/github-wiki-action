@@ -63,7 +63,7 @@ if (core.getBooleanInput("preprocess")) {
   const plugin = () => (tree: any) =>
     visit(tree, ["link", "linkReference"], (node: any) => {
       const matches = node.url?.match(mdRe)
-      if (matches === null || matches === undefined) {
+      if (!matches) {
         return;
       }
       if (!new URL(node.url, "file:///-/").href.startsWith("file:///-/")) {
