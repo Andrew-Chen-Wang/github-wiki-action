@@ -63,7 +63,7 @@ if (core.getBooleanInput("preprocess")) {
   const plugin = () => (tree: any) =>
     visit(tree, ["link", "linkReference"], (node: any) => {
       const matches = node.url.match(mdRe)
-      if (matches.length == 0) {
+      if (matches.length === null) {
         return;
       }
       if (!new URL(node.url, "file:///-/").href.startsWith("file:///-/")) {
@@ -71,7 +71,7 @@ if (core.getBooleanInput("preprocess")) {
       }
 
       const x = node.url;
-      node.url = matches.length == 2 
+      node.url = matches.length === 2
         ? node.url.replace(mdRe, "$1") 
         : node.url.replace(mdRe, "");
       if (new URL(node.url, "file:///-/").href === "file:///-/README") {
