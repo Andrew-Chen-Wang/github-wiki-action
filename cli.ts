@@ -62,8 +62,8 @@ if (core.getBooleanInput("preprocess")) {
   const mdRe = /\.(?:md|markdown|mdown|mkdn|mkd|mdwn|mkdown|ron)(#[\w\-]*)?$/;
   const plugin = () => (tree: any) =>
     visit(tree, ["link", "linkReference"], (node: any) => {
-      const matches = node.url.match(mdRe)
-      if (matches === null) {
+      const matches = node.url?.match(mdRe)
+      if (matches === null || matches === undefined) {
         return;
       }
       if (!new URL(node.url, "file:///-/").href.startsWith("file:///-/")) {
