@@ -59,7 +59,7 @@ if (core.getBooleanInput("preprocess")) {
     console.log("Moved README.md to Home.md");
   }
 
-  const mdRe = /\.(?:md|markdown|mdown|mkdn|mkd|mdwn|mkdown|ron)$/;
+  const mdRe = /\.(?:md|markdown|mdown|mkdn|mkd|mdwn|mkdown|ron)(#[\w\-]*)?$/;
   const plugin = () => (tree: any) =>
     visit(tree, ["link", "linkReference"], (node: any) => {
       if (!mdRe.test(node.url)) {
