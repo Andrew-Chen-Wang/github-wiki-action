@@ -62,6 +62,7 @@ if (core.getBooleanInput("preprocess")) {
   const mdRe = /\.(?:md|markdown|mdown|mkdn|mkd|mdwn|mkdown|ron)(#[\w\-]*)?$/;
   const plugin = () => (tree: any) =>
     visit(tree, ["link", "linkReference"], (node: any) => {
+      
       if (!mdRe.test(node.url)) {
         return;
       }
@@ -70,7 +71,9 @@ if (core.getBooleanInput("preprocess")) {
       }
 
       const x = node.url;
-      node.url = node.url.replace(mdRe, "$1");
+      node.url = node.url.match(mdRe).length == 2 
+        ? node.url.replace(mdRe, "$1") 
+        : node.url.replace(mdRe, "");
       if (new URL(node.url, "file:///-/").href === "file:///-/README") {
         node.url = "Home";
       }
