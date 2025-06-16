@@ -92,7 +92,11 @@ if (core.getBooleanInput("preprocess")) {
 }
 
 await $`git add -Av`;
-await $`git commit --allow-empty -m ${core.getInput("commit_message")}`;
+if (core.getBooleanInput("disable_empty_commits")) {
+  await $`git commit -m ${core.getInput("commit_message")}`;
+} else {
+  await $`git commit --allow-empty -m ${core.getInput("commit_message")}`;
+}
 
 if (core.getBooleanInput("dry_run")) {
   await $`git show`;
