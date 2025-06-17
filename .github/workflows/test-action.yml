@@ -47,6 +47,34 @@ jobs:
         with:
           strategy: init
           dry-run: true
+  test-action-clone-dry-run-no-empty:
+    # Expects no commit (unless the wiki test files are changed).
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./
+        with:
+          strategy: clone
+          dry-run: true
+          disable-empty-commits: true
+  test-action-init-dry-run-no-empty:
+    # Expects a commit either way as the init strategy creates an orphan branch.
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./
+        with:
+          strategy: init
+          dry-run: true
+          disable-empty-commits: true
   test-action-real:
     concurrency: ${{ github.workflow }}-real
     permissions:
