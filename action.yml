@@ -71,6 +71,14 @@ inputs:
       default is true.
     required: true
     default: true
+  disable-empty-commits:
+    description: >-
+      By default, any triggering of this action will result in a commit to the
+      Wiki, even if that commit is empty. If this option is true, a workflow
+      run which would result in no changes to the Wiki files, will no longer
+      create an empty commit. The default is false.
+    required: false
+    default: false
 outputs:
   wiki_url:
     description: >-
@@ -94,3 +102,4 @@ runs:
         INPUT_IGNORE: ${{ inputs.ignore }}
         INPUT_DRY_RUN: ${{ inputs.dry-run }}
         INPUT_PREPROCESS: ${{ inputs.preprocess }}
+        INPUT_DISABLE_EMPTY_COMMITS: ${{ inputs.disable-empty-commits }}

@@ -116,6 +116,11 @@ is specific to GitHub wikis.
   links. This helps ensure that the Markdown works in source control as well as
   the wiki. The default is true.
 
+- **`disable-empty-commits`:** By default, any triggering of this action will
+  result in a commit to the Wiki, even if that commit is empty.
+  If this option is true, a workflow run which would result in no changes
+  to the Wiki files, will no longer create an empty commit. The default is false.
+
 #### `strategy:` input
 
 There are some specific usecases where using `strategy: init` might be better
