@@ -96,7 +96,7 @@ if (core.getBooleanInput("disable_empty_commits")) {
   try {
     await $`git commit -m ${core.getInput("commit_message")}`;
   } catch (e) {
-    if (e.exitCode === 1 && e.stderr.includes("nothing to commit")) {
+    if (e.exitCode === 1 && e.stdout.includes("nothing to commit")) {
       console.log("nothing to commit, working tree clean");
     } else {
       throw e; // Unexpected error
