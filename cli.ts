@@ -48,6 +48,8 @@ if (core.getInput("strategy") === "clone") {
 // https://github.com/stefanzweifel/git-auto-commit-action/blob/master/action.yml#L35-L42
 await $`git config user.name github-actions[bot]`;
 await $`git config user.email 41898282+github-actions[bot]@users.noreply.github.com`;
+await $`git config --global user.name github-actions[bot]`;
+await $`git config --global user.email 41898282+github-actions[bot]@users.noreply.github.com`;
 
 await appendFile(".git/info/exclude", core.getInput("ignore"));
 await copy(resolve(workspacePath, core.getInput("path")), process.cwd());
