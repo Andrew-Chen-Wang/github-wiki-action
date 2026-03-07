@@ -57,9 +57,9 @@ await appendFile(".git/info/exclude", core.getInput("ignore"));
 // Remove all files/dirs (except .git) from the wiki clone so that files
 // deleted from the source wiki directory are also removed in the wiki repo.
 await Promise.all(
-  (await readdir(process.cwd()))
+  (await readdir(d))
     .filter((entry) => entry !== ".git")
-    .map((entry) => rm(resolve(process.cwd(), entry), { recursive: true, force: true }))
+    .map((entry) => rm(resolve(d, entry), { recursive: true, force: true }))
 );
 
 await copy(
