@@ -8,6 +8,7 @@ import {
   appendFile,
   readdir,
   rename,
+  rm,
 } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { copy } from "npm:fs-extra@^11.1.1";
@@ -52,6 +53,15 @@ await $`git config --global user.name github-actions[bot]`;
 await $`git config --global user.email 41898282+github-actions[bot]@users.noreply.github.com`;
 
 await appendFile(".git/info/exclude", core.getInput("ignore"));
+
+// Remove all files/dirs (except .git) from the wiki clone so that files
+// deleted from the source wiki directory are also removed in the wiki repo.
+await Promise.all(
+  (await readdir(process.cwd()))
+    .filter((entry) => entry !== ".git")
+    .map((entry) => rm(resolve(process.cwd(), entry), { recursive: true, force: true }))
+);
+
 await copy(
   resolve(workspacePath, core.getInput("path")),
   process.cwd(),
