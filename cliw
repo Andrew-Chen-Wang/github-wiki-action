@@ -22,7 +22,7 @@ chronic() (
 if [ ! -d "$deno_dir" ]; then
   # https://github.com/denoland/deno_install#readme
   export DENO_INSTALL=$deno_dir
-  curl -fsSL https://deno.land/x/install/install.sh | chronic sh -s "v1.35.1"
+  curl -fsSL https://deno.land/install.sh | chronic sh -s "v2.8.3"
 fi
 
 # https://github.com/denoland/deno_install/blob/master/install.sh#L53
