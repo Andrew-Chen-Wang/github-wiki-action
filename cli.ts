@@ -23,6 +23,19 @@ core.startGroup("process.env");
 console.table(process.env);
 core.endGroup();
 
+const isProcessError = (
+  err: unknown,
+): err is { exitCode: number; stdout: string } => {
+  return (
+    typeof err === "object" &&
+    err !== null &&
+    "exitCode" in err &&
+    typeof err.exitCode === "number" &&
+    "stdout" in err &&
+    typeof err.stdout === "string"
+  );
+};
+
 const serverURL = core.getInput("github_server_url");
 const repo = core.getInput("repository");
 const wikiGitURL = `${serverURL}/${repo}.wiki.git`;
@@ -115,12 +128,16 @@ await $`git add -Av`;
 if (core.getBooleanInput("disable_empty_commits")) {
   try {
     await $`git commit -m ${core.getInput("commit_message")}`;
-  } catch (e) {
-    if (e.exitCode === 1 && e.stdout.includes("nothing to commit")) {
-      console.log("nothing to commit, working tree clean");
-    } else {
+  } catch (e: unknown) {
+    if (
+      !isProcessError(e) ||
+      e.exitCode !== 1 ||
+      !e.stdout.includes("nothing to commit")
+    ) {
       throw e; // Unexpected error
     }
+
+    console.log("nothing to commit, working tree clean");
   }
 } else {
   await $`git commit --allow-empty -m ${core.getInput("commit_message")}`;
