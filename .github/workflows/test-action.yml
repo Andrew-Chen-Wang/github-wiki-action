@@ -33,7 +33,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.8.3
@@ -45,7 +45,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./
         with:
           strategy: clone
@@ -57,7 +57,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./
         with:
           strategy: init
@@ -70,7 +70,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./
         with:
           strategy: clone
@@ -84,39 +84,18 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./
         with:
           strategy: init
           dry-run: true
           disable-empty-commits: true
-  test-action-pull:
-    # Pulls the repository's actual wiki back into the workspace (writes only
-    # to the runner's checkout; nothing is committed or pushed anywhere).
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./
-        with:
-          direction: pull
-      - name: Verify pulled wiki contents
-        shell: bash
-        run: |
-          set -eux
-          # The push preprocess renames README.md to Home.md; the pull must
-          # invert it.
-          test -s wiki/README.md
-          test ! -f wiki/Home.md
-          # Bare wiki page links must get their .md extension back.
-          grep -F "(./another-page.md)" wiki/README.md
-  test-action-real:
-    # Pushes to this repository's actual wiki, then clones it back and
-    # verifies the pushed contents match the wiki/ source directory.
-    # Skipped for fork PRs, which have a read-only token.
+  test-e2e:
+    # Live end-to-end tests (tests/e2e.test.ts): pushes wiki/ to this
+    # repository's actual wiki, verifies the published pages over HTTP
+    # (every Home page link must resolve on github.com), then pulls the
+    # wiki back and verifies the inverse transforms. Skipped for fork PRs,
+    # which have a read-only token.
     if: >-
       github.event_name == 'push' ||
       github.event.pull_request.head.repo.full_name == github.repository
@@ -125,17 +104,10 @@ jobs:
       contents: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: ./
-      - name: Verify pushed wiki contents
-        run: |
-          set -eux
-          git clone "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.wiki.git" /tmp/wiki-verify
-          # README.md is renamed to Home.md by the preprocess step; every
-          # other file must match the wiki/ source tree exactly by name.
-          diff \
-            <(cd wiki && find . -type f | sed 's|^\./||; s|^README\.md$|Home.md|' | sort) \
-            <(cd /tmp/wiki-verify && find . -name .git -prune -o -type f -print | sed 's|^\./||' | sort)
-          test -s /tmp/wiki-verify/Home.md
+      - uses: actions/checkout@v7
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.8.3
+      - run: deno test -A tests/e2e.test.ts
         env:
-          GH_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ github.token }}

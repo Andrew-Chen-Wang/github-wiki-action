@@ -46,8 +46,8 @@ jobs:
   publish-wiki:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: Andrew-Chen-Wang/github-wiki-action@v4
+      - uses: actions/checkout@v7
+      - uses: Andrew-Chen-Wang/github-wiki-action@v5
 ```
 
 ☝ This workflow will mirror the `wiki/` folder in your GitHub repository to the
@@ -177,11 +177,11 @@ jobs:
   pull-wiki:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: Andrew-Chen-Wang/github-wiki-action@v4
+      - uses: actions/checkout@v7
+      - uses: Andrew-Chen-Wang/github-wiki-action@v5
         with:
           direction: pull
-      - uses: peter-evans/create-pull-request@v6
+      - uses: peter-evans/create-pull-request@v8
         with:
           branch: sync-wiki
           title: Sync wiki edits back into wiki/
@@ -214,8 +214,8 @@ jobs:
   publish-wiki:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: Andrew-Chen-Wang/github-wiki-action@v4
+      - uses: actions/checkout@v7
+      - uses: Andrew-Chen-Wang/github-wiki-action@v5
         with:
           token: ${{ secrets.MEGA_PROJECT_GITHUB_TOKEN }}
           repository: octocat/mega-project
