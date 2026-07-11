@@ -512,8 +512,13 @@ async function runPullScenario(scenario: PullScenario): Promise<void> {
     walk(join(workspace, "wiki"), "");
     assertEquals(files.sort(), Object.keys(scenario.expect).sort());
     for (const [path, content] of Object.entries(scenario.expect)) {
+      // Windows runners clone with core.autocrlf=true, so files the cli
+      // copies verbatim (non-Markdown pages) carry CRLF line endings.
+      const actual = await Deno.readTextFile(
+        join(workspace, "wiki", ...path.split("/")),
+      );
       assertEquals(
-        (await Deno.readTextFile(join(workspace, "wiki", ...path.split("/")))).trim(),
+        actual.replaceAll("\r\n", "\n").trim(),
         content.trim(),
         `content mismatch for ${path}`,
       );
