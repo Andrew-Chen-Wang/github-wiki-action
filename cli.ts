@@ -53,9 +53,18 @@ process.env.GH_TOKEN = core.getInput("token");
 process.env.GH_HOST = new URL(core.getInput("github_server_url")).host;
 await $`gh auth setup-git`;
 
-// File extensions GitHub renders as Markdown pages.
+// File extensions GitHub renders as wiki pages, in restore-priority order.
 // https://github.com/github/markup
-const pageExtRe = /\.(?:md|markdown|mdown|mkdn|mkd|mdwn|mkdown|ron)$/;
+// deno-fmt-ignore
+const pageExts = [
+  "md", "markdown", "mdown", "mkdn", "mkd", "mdwn", "mkdown",
+  "asciidoc", "adoc", "asc", "rst", "mediawiki", "wiki",
+  "textile", "rdoc", "org", "creole", "pod",
+];
+const pageExtRe = new RegExp(`\\.(?:${pageExts.join("|")})$`);
+// Only Markdown can be parsed by the remark-based link rewriter; the other
+// page formats are synced verbatim but still count as link targets above.
+const markdownExtRe = /\.(?:md|markdown|mdown|mkdn|mkd|mdwn|mkdown)$/;
 
 // URLs that are plain paths: no scheme (https:, mailto:, ...) and no //host.
 const isPathOnly = (url: string) =>
@@ -93,7 +102,7 @@ async function rewriteLinks(
       node.url = rewritten;
     });
   for (const file of await readdir(dir)) {
-    if (!pageExtRe.test(file)) continue;
+    if (!markdownExtRe.test(file)) continue;
     const path = resolve(dir, file);
     const md = await readFile(path, "utf-8");
     await writeFile(path, (await remark().use(plugin).process(md)).toString());
@@ -124,7 +133,9 @@ if (core.getInput("direction") === "pull") {
       if (renameHome && target === resolve(d, "Home")) {
         return path.replace(/Home$/, "README") + ".md" + suffix;
       }
-      if (existsSync(target + ".md")) return path + ".md" + suffix;
+      for (const ext of pageExts) {
+        if (existsSync(`${target}.${ext}`)) return `${path}.${ext}${suffix}`;
+      }
       return;
     });
 

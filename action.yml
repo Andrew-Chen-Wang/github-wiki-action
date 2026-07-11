@@ -77,7 +77,8 @@ inputs:
   preprocess:
     description: >-
       If this option is true, we will preprocess the wiki to move the README.md
-      to Home.md as well as rewriting all .md links to be bare links. Relative
+      to Home.md as well as rewriting links to wiki pages (in any markup format
+      GitHub renders, like .md, .rst, or .adoc) to be bare links. Relative
       links that point to other files in your repository (like a script or
       source file) are rewritten to full blob view URLs, mirroring how GitHub
       renders in-repo Markdown. This helps ensure that the Markdown works in

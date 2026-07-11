@@ -121,7 +121,9 @@ is specific to GitHub wikis.
   testing.
 
 - **`preprocess`:** If this option is true, we will preprocess the wiki to move
-  the `README.md` to `Home.md` as well as rewriting all `.md` links to be bare
+  the `README.md` to `Home.md` as well as rewriting links to wiki pages to be
+  bare links. Link targets in any markup format GitHub renders (`.md`, `.rst`,
+  `.adoc`, ...) are recognized, though only Markdown files are parsed for
   links. Relative links that point at other files in your repository (a script,
   a source file, a Markdown file outside the wiki folder) are rewritten to full
   `blob/` view URLs pinned to the pushed commit, the same way GitHub resolves

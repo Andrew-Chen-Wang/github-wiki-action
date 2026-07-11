@@ -373,6 +373,36 @@ Deno.test("preprocess rewrites repo file links to blob URLs (#78)", () =>
     },
   }));
 
+// GitHub wikis render more than Markdown (AsciiDoc, reStructuredText, ...).
+// Links from Markdown pages to pages in any supported format must be
+// bare-linked, while the non-Markdown files themselves are synced verbatim —
+// they must never be fed through the Markdown parser.
+Deno.test("preprocess bare-links pages of any GitHub-supported format", () =>
+  runScenario({
+    preprocess: true,
+    remote: { "Home.md": "old" },
+    workspaceWiki: {
+      "Home.md": [
+        "[guide](./Guide.rst)",
+        "[notes](Notes.adoc#setup)",
+        "[usage](Usage.md)",
+      ].join("\n\n") + "\n",
+      "Guide.rst": "Title\n=====\n\n`a link <./Home>`_ and *rst stuff*\n",
+      "Notes.adoc": "= Notes\n\nSome asciidoc.\n",
+      "Usage.md": "usage",
+    },
+    expect: {
+      "Home.md": [
+        "[guide](./Guide)",
+        "[notes](Notes#setup)",
+        "[usage](Usage)",
+      ].join("\n\n"),
+      "Guide.rst": "Title\n=====\n\n`a link <./Home>`_ and *rst stuff*",
+      "Notes.adoc": "= Notes\n\nSome asciidoc.",
+      "Usage.md": "usage",
+    },
+  }));
+
 // ---------------------------------------------------------------------------
 // direction: pull (issue #67) — wiki -> workspace sync with the inverse
 // preprocess transforms.
@@ -524,6 +554,21 @@ Deno.test("pull: mirrors the wiki into the workspace with inverse preprocess (#6
         "[missing](./no-such-page)",
       ].join("\n\n"),
       "another-page.md": "another page",
+    },
+  }));
+
+Deno.test("pull: restores the extension pages actually have, not just .md", () =>
+  runPullScenario({
+    remote: {
+      "Home.md": "[guide](./Guide)\n\n[usage](./Usage#intro)\n",
+      "Guide.rst": "Title\n=====\n\n*rst stuff*\n",
+      "Usage.md": "usage",
+    },
+    workspaceWiki: {},
+    expect: {
+      "README.md": "[guide](./Guide.rst)\n\n[usage](./Usage.md#intro)",
+      "Guide.rst": "Title\n=====\n\n*rst stuff*",
+      "Usage.md": "usage",
     },
   }));
 
