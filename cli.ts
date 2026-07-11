@@ -20,7 +20,16 @@ import { visit } from "npm:unist-util-visit@^5.0.0";
 import { basename, join, relative, resolve, sep } from "node:path";
 
 core.startGroup("process.env");
-console.table(process.env);
+// The runner masks registered secrets in logs, but don't rely on it —
+// redact anything credential-shaped (covers PATs passed as plain env).
+console.table(
+  Object.fromEntries(
+    Object.entries(process.env).map(([key, value]) => [
+      key,
+      /token|secret|password|credential/i.test(key) ? "***" : value,
+    ]),
+  ),
+);
 core.endGroup();
 
 const isProcessError = (
@@ -39,6 +48,10 @@ const isProcessError = (
 const serverURL = core.getInput("github_server_url");
 const repo = core.getInput("repository");
 const wikiGitURL = `${serverURL}/${repo}.wiki.git`;
+const direction = core.getInput("direction") || "push";
+if (direction !== "push" && direction !== "pull") {
+  throw new DOMException("Unknown direction", "NotSupportedError");
+}
 const workspacePath = process.cwd();
 const d = temporaryDirectory();
 // zx's cd() instead of process.chdir(): zx >=7.2 keeps process.cwd() pinned
@@ -109,7 +122,7 @@ async function rewriteLinks(
   }
 }
 
-if (core.getInput("direction") === "pull") {
+if (direction === "pull") {
   // Sync the wiki back into the source tree: the exact inverse of the push
   // preprocess (issue #67). Clones the wiki, restores source-friendly
   // Markdown (Home.md -> README.md, bare page links -> .md links), and

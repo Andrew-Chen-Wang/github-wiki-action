@@ -12,11 +12,13 @@ inputs:
     description: >-
       Select from 'push' or 'pull'. 'push' (the default) syncs the path folder
       to the GitHub wiki. 'pull' does the reverse: it clones the wiki, converts
-      the pages back into source-friendly Markdown (Home.md becomes README.md
-      and bare wiki page links get their .md extension back when preprocess is
-      enabled), and mirrors them into the path folder of your workspace.
-      Nothing is committed or pushed to your repository in pull mode; pair it
-      with a PR-creating action like peter-evans/create-pull-request.
+      the pages back into source-friendly form (Home.md becomes README.md and
+      bare wiki page links get the extension of the page they target back,
+      in any markup format GitHub renders) when preprocess is enabled, and
+      mirrors them into the path folder of your workspace. The ignore input is
+      not applied in pull mode. Nothing is committed or pushed to your
+      repository in pull mode; pair it with a PR-creating action like
+      peter-evans/create-pull-request.
     required: true
     default: push
   strategy:

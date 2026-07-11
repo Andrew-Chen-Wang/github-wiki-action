@@ -80,11 +80,12 @@ is specific to GitHub wikis.
 
 - **`direction`:** Select from `push` or `pull`. `push` (the default) syncs the
   `path` folder to the GitHub wiki. `pull` does the reverse: it clones the
-  wiki, converts the pages back into source-friendly Markdown (`Home.md`
-  becomes `README.md` and bare wiki page links get their `.md` extension back),
-  and mirrors them into the `path` folder of your workspace. Nothing is
-  committed or pushed to your repository in pull mode; pair it with a
-  PR-creating action like [create-pull-request]. See
+  wiki, converts the pages back into source-friendly form (`Home.md` becomes
+  `README.md` and bare wiki page links get the extension of the page they
+  target back), and mirrors them into the `path` folder of your workspace. The
+  `ignore` input is not applied in pull mode. Nothing is committed or pushed
+  to your repository in pull mode; pair it with a PR-creating action like
+  [create-pull-request]. See
   [Pulling wiki edits back](#pulling-wiki-edits-back) below.
 
 - **`strategy`:** Select from `clone` or `init` to determine which method to use
@@ -134,6 +135,16 @@ is specific to GitHub wikis.
   result in a commit to the Wiki, even if that commit is empty.
   If this option is true, a workflow run which would result in no changes
   to the Wiki files, will no longer create an empty commit. The default is false.
+
+#### `preprocess:` limitations
+
+- Only Markdown pages at the top level of the `path` folder have their links
+  rewritten; pages in subdirectories and non-Markdown pages are synced
+  verbatim.
+- Inline links are rewritten; reference-style link definitions
+  (`[label]: ./page.md`) and image links are not.
+- A page whose name itself ends in a renderable extension (say a page called
+  `example.org`) is treated as a file link rather than a page link.
 
 #### `strategy:` input
 

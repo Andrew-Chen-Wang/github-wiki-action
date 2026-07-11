@@ -604,6 +604,24 @@ Deno.test("pull: preprocess=false copies the wiki verbatim", () =>
     },
   }));
 
+Deno.test("rejects an unknown direction instead of silently pushing", async () => {
+  // The direction check runs before any other input is read, so the
+  // inherited environment doesn't matter here.
+  const out = await new Deno.Command(Deno.execPath(), {
+    args: ["run", "-A", CLI_PATH],
+    env: { INPUT_DIRECTION: "sideways" },
+    stdout: "piped",
+    stderr: "piped",
+  }).output();
+  if (out.success) {
+    throw new Error("cli.ts accepted direction=sideways");
+  }
+  assertEquals(
+    new TextDecoder().decode(out.stderr).includes("Unknown direction"),
+    true,
+  );
+});
+
 Deno.test("pull: dry run leaves the workspace untouched", () =>
   runPullScenario({
     dryRun: true,
