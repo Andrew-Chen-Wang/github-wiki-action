@@ -110,7 +110,10 @@ if (core.getInput("direction") === "pull") {
   await $`git clone ${wikiGitURL} .`;
 
   if (core.getBooleanInput("preprocess")) {
-    const hasHome = existsSync(resolve(d, "Home.md"));
+    // Only restore Home.md -> README.md when that doesn't clobber a real
+    // README.md page (wikis synced without preprocess can have both).
+    const renameHome = existsSync(resolve(d, "Home.md")) &&
+      !existsSync(resolve(d, "README.md"));
     await rewriteLinks(d, (url) => {
       const [path, suffix] = splitPath(url);
       if (!path || path.startsWith("/") || pageExtRe.test(path)) return;
@@ -118,14 +121,14 @@ if (core.getInput("direction") === "pull") {
       if (decoded === undefined) return;
       const target = resolve(d, decoded);
       if (!contains(d, target)) return;
-      if (hasHome && target === resolve(d, "Home")) {
+      if (renameHome && target === resolve(d, "Home")) {
         return path.replace(/Home$/, "README") + ".md" + suffix;
       }
       if (existsSync(target + ".md")) return path + ".md" + suffix;
       return;
     });
 
-    if (hasHome) {
+    if (renameHome) {
       await rename(resolve(d, "Home.md"), resolve(d, "README.md"));
       console.log("Moved Home.md to README.md");
     }
@@ -195,12 +198,18 @@ await copy(
 
 if (core.getBooleanInput("preprocess")) {
   // https://github.com/nodejs/node/issues/39960
-  if (existsSync(resolve(d, "README.md"))) {
+  // Only promote README.md when the source has no Home.md of its own —
+  // renaming over a real Home.md would silently drop a page.
+  if (
+    existsSync(resolve(d, "README.md")) && !existsSync(resolve(d, "Home.md"))
+  ) {
     await rename(resolve(d, "README.md"), resolve(d, "Home.md"));
     console.log("Moved README.md to Home.md");
   }
 
   const sourceDir = resolve(workspacePath, core.getInput("path"));
+  const readmeIsHome = existsSync(resolve(sourceDir, "README.md")) &&
+    !existsSync(resolve(sourceDir, "Home.md"));
   // Links to source files point at the repo the workflow checked out, which
   // is not necessarily the wiki's repo (cross-repo publishing).
   const blobBase = `${process.env.GITHUB_SERVER_URL || serverURL}/${
@@ -220,7 +229,9 @@ if (core.getBooleanInput("preprocess")) {
     if (contains(sourceDir, target)) {
       // Links between wiki pages become bare page links (issue #8).
       if (!pageExtRe.test(decoded)) return;
-      if (target === resolve(sourceDir, "README.md")) return "Home" + suffix;
+      if (readmeIsHome && target === resolve(sourceDir, "README.md")) {
+        return "Home" + suffix;
+      }
       return path.replace(pageExtRe, "") + suffix;
     }
     // Links to other files in the repository become blob view URLs, the same

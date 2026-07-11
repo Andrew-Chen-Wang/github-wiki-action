@@ -311,6 +311,24 @@ Deno.test("preprocess renames README.md to Home.md and rewrites .md links", () =
     },
   }));
 
+// A source tree can legitimately contain both README.md and Home.md as
+// separate pages (e.g. wikis previously synced without preprocess, like
+// opensearch-project/opensearch-build). Promoting README.md must never
+// clobber a real Home.md, and links must keep pointing at the right pages.
+Deno.test("preprocess keeps a real Home.md instead of clobbering it with README.md", () =>
+  runScenario({
+    preprocess: true,
+    remote: { "Home.md": "old" },
+    workspaceWiki: {
+      "README.md": "readme page\n\n[home](Home.md)\n",
+      "Home.md": "real home\n\n[readme](README.md)\n",
+    },
+    expect: {
+      "README.md": "readme page\n\n[home](Home)",
+      "Home.md": "real home\n\n[readme](README)",
+    },
+  }));
+
 // Issue #78: relative links that point at real files in the checked-out
 // repository (outside the wiki source dir) become blob view URLs, mirroring
 // how GitHub renders in-repo Markdown. Everything else is left alone.
@@ -506,6 +524,19 @@ Deno.test("pull: mirrors the wiki into the workspace with inverse preprocess (#6
         "[missing](./no-such-page)",
       ].join("\n\n"),
       "another-page.md": "another page",
+    },
+  }));
+
+Deno.test("pull: keeps a real README.md instead of clobbering it with Home.md", () =>
+  runPullScenario({
+    remote: {
+      "Home.md": "wiki home\n\n[readme](./README)\n",
+      "README.md": "wiki readme\n",
+    },
+    workspaceWiki: {},
+    expect: {
+      "Home.md": "wiki home\n\n[readme](./README.md)",
+      "README.md": "wiki readme",
     },
   }));
 
