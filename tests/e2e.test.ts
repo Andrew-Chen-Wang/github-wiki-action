@@ -1,16 +1,21 @@
 // Live end-to-end tests for cli.ts against the repository's real wiki.
 //
 // The push test publishes wiki/ to the actual GitHub wiki, clones it back to
-// verify the pushed contents, and then verifies the *published* result over
-// HTTP: the pages GitHub renders, that every link on the Home page resolves,
-// and that the in-wiki anchor link targets a heading that exists. The pull
-// test then syncs the live wiki back into a scratch workspace and verifies
-// the inverse preprocess transforms.
+// verify the pushed contents, and then verifies the *published* result the
+// way a wiki reader would: it fetches the rendered Home page HTML, extracts
+// the links GitHub actually rendered, navigates every one of them, and
+// asserts both that they load (no 404s) and that the destination shows the
+// expected content (the anchor's target heading, the real file at the pinned
+// commit). The pull test then syncs the live wiki back into a scratch
+// workspace and verifies the inverse preprocess transforms.
 //
 // These tests write to the real wiki, so they only run when a token is
 // available AND we're either in GitHub Actions or explicitly opted in:
 //
 //   E2E=1 GITHUB_TOKEN=$(gh auth token) deno test -A tests/e2e.test.ts
+//
+// Outside CI the current commit is used for blob links, so HEAD must be
+// pushed for the navigation checks to pass.
 import {
   assert,
   assertEquals,
@@ -25,10 +30,32 @@ const CLI_PATH = join(ROOT, "cli.ts");
 
 const REPO = Deno.env.get("GITHUB_REPOSITORY") ??
   "Andrew-Chen-Wang/github-wiki-action";
-// cli.ts pins blob links to GITHUB_SHA and falls back to HEAD outside CI.
-const SHA = Deno.env.get("GITHUB_SHA") ?? "HEAD";
+const SHA = Deno.env.get("GITHUB_SHA") ?? gitSync(ROOT, "rev-parse", "HEAD");
 const BLOB_BASE = `https://github.com/${REPO}/blob/${SHA}`;
 const WIKI_BASE = `https://github.com/${REPO}/wiki`;
+
+// Distinctive text expected inside each repository file the wiki links to.
+const FILE_MARKERS: Record<string, string> = {
+  "cli.ts": "gh auth setup-git",
+  "tests/cli.test.ts": "Integration tests for cli.ts",
+};
+const ANCHOR = "some＿impꗝrtant＿stuff-";
+const PAGE_MARKER = "we gotta give this a try";
+
+function gitSync(cwd: string, ...args: string[]): string {
+  const out = new Deno.Command("git", {
+    args,
+    cwd,
+    stdout: "piped",
+    stderr: "piped",
+  }).outputSync();
+  if (!out.success) {
+    throw new Error(
+      `git ${args.join(" ")} failed:\n${new TextDecoder().decode(out.stderr)}`,
+    );
+  }
+  return new TextDecoder().decode(out.stdout).trim();
+}
 
 function ghToken(): string {
   const env = Deno.env.get("GITHUB_TOKEN") ?? Deno.env.get("GH_TOKEN");
@@ -67,7 +94,8 @@ async function git(cwd: string, ...args: string[]): Promise<string> {
 
 // Runs cli.ts against the real wiki. HOME is sandboxed so the cli's global
 // git config writes don't leak into the host; everything else (PATH with the
-// real gh, GITHUB_* vars) is inherited.
+// real gh) is inherited. GITHUB_* vars are pinned so the cli and this test
+// agree on the source repo and commit.
 async function runCli(cwd: string, inputs: Record<string, string>) {
   const home = await Deno.makeTempDir({ prefix: "wiki-e2e-home-" });
   const out = await new Deno.Command(Deno.execPath(), {
@@ -77,6 +105,9 @@ async function runCli(cwd: string, inputs: Record<string, string>) {
       HOME: home,
       USERPROFILE: home,
       XDG_CONFIG_HOME: join(home, ".config"),
+      GITHUB_SERVER_URL: "https://github.com",
+      GITHUB_REPOSITORY: REPO,
+      GITHUB_SHA: SHA,
       INPUT_STRATEGY: "clone",
       INPUT_REPOSITORY: REPO,
       INPUT_GITHUB_SERVER_URL: "https://github.com",
@@ -117,13 +148,14 @@ async function fetchOk(url: string): Promise<string> {
 }
 
 Deno.test({
-  name: "e2e push: publishes the wiki and every Home page link resolves",
+  name: "e2e push: publishes the wiki and the rendered Home page links work",
   ignore: !ENABLED,
   fn: async () => {
     await runCli(ROOT, {});
 
-    // Clone the wiki back: the pushed tree must mirror the wiki/ source
-    // directory with README.md renamed to Home.md.
+    // --- The wiki repo: the pushed tree must mirror the wiki/ source
+    // directory with README.md renamed to Home.md, and the preprocess must
+    // have rewritten the links (#8, #78).
     const clone = await Deno.makeTempDir({ prefix: "wiki-e2e-clone-" });
     await git(
       clone,
@@ -141,38 +173,69 @@ Deno.test({
       .sort();
     assertEquals(wikiFiles, sourceFiles);
 
-    // Preprocess transforms: page links went bare (#8) and repo-file links
-    // became blob URLs pinned to this commit (#78).
     const home = await Deno.readTextFile(join(clone, "Home.md"));
     assertStringIncludes(home, "(./another-page)");
     assert(!home.includes("(./another-page.md)"), "page link kept .md");
     assertStringIncludes(home, `${BLOB_BASE}/cli.ts`);
     assertStringIncludes(home, `${BLOB_BASE}/tests/cli.test.ts`);
 
-    // Navigate every link on the published Home page: in-wiki links resolve
-    // relative to the wiki, blob links are absolute. All must load.
-    const links = [...home.matchAll(/\]\(([^)]+)\)/g)].map((m) => m[1]);
-    assert(links.length >= 4, `only found ${links.length} links on Home`);
-    for (const link of links) {
-      const path = link.split("#")[0];
-      if (!path) continue; // same-page anchor
-      assert(
-        path.startsWith("./") || path.startsWith("https://"),
-        `unexpected link on Home: ${link}`,
-      );
-      const target = path.startsWith("./")
-        ? `${WIKI_BASE}/${path.slice(2)}`
-        : path;
-      await fetchOk(target);
-    }
+    // --- The rendered Home page: extract the links GitHub actually rendered
+    // in the page HTML. Gollum emits in-wiki page links as "wiki/./<page>"
+    // and leaves the blob URLs absolute.
+    const homeHtml = await fetchOk(WIKI_BASE);
+    const hrefs = [...homeHtml.matchAll(/href="([^"]+)"/g)].map((m) => m[1]);
+    const pageLinks = [
+      ...new Set(hrefs.filter((h) => h.startsWith("wiki/"))),
+    ].map((h) => new URL(h, WIKI_BASE)); // resolve like a browser would
+    const blobLinks = [
+      ...new Set(
+        hrefs.filter((h) => h.startsWith(`https://github.com/${REPO}/blob/`)),
+      ),
+    ];
 
-    // The rendered Home page shows the blob link, and the in-wiki anchor
-    // link targets a heading that exists on the rendered destination page.
-    assertStringIncludes(await fetchOk(WIKI_BASE), `${BLOB_BASE}/cli.ts`);
-    assertStringIncludes(
-      await fetchOk(`${WIKI_BASE}/another-page`),
-      "some＿impꗝrtant＿stuff-",
+    // The repo-file links must be rendered pinned to this exact commit.
+    assertEquals(blobLinks.sort(), [
+      `${BLOB_BASE}/cli.ts`,
+      `${BLOB_BASE}/tests/cli.test.ts`,
+    ]);
+    // The in-wiki links must lead to the other page, one with the anchor.
+    assert(
+      pageLinks.some((u) => u.href === `${WIKI_BASE}/another-page`),
+      `no rendered link to another-page in ${pageLinks.map((u) => u.href)}`,
     );
+    assert(
+      pageLinks.some(
+        (u) =>
+          u.href ===
+            `${WIKI_BASE}/another-page#${encodeURIComponent(ANCHOR)}`,
+      ),
+      "no rendered link carrying the section anchor",
+    );
+
+    // --- Navigate every rendered link and verify the destination content.
+    for (const page of new Set(pageLinks.map((u) => u.origin + u.pathname))) {
+      const html = await fetchOk(page);
+      // The linked page really is another-page...
+      assertStringIncludes(html, PAGE_MARKER);
+      // ...and the heading the anchor link points at exists on it.
+      assertStringIncludes(html, ANCHOR);
+    }
+    for (const blob of blobLinks) {
+      const path = blob.slice(`${BLOB_BASE}/`.length);
+      // The blob view loads and shows this file at this commit...
+      assertStringIncludes(
+        await fetchOk(blob),
+        `<title>${REPO.split("/")[1]}/${path} at ${SHA}`,
+      );
+      // ...and the file content at that exact ref is the real file.
+      assertStringIncludes(
+        await fetchOk(
+          `https://raw.githubusercontent.com/${REPO}/${SHA}/${path}`,
+        ),
+        FILE_MARKERS[path] ?? "",
+        `unexpected content for ${path}`,
+      );
+    }
   },
 });
 
@@ -205,10 +268,7 @@ Deno.test({
     );
     assert(existsSync(join(workspace, "wiki", "another-page.md")));
     assertStringIncludes(readme, "(./another-page.md)");
-    assertStringIncludes(
-      readme,
-      "(./another-page.md#some＿impꗝrtant＿stuff-)",
-    );
+    assertStringIncludes(readme, `(./another-page.md#${ANCHOR})`);
     assertStringIncludes(readme, `${BLOB_BASE}/cli.ts`);
   },
 });
