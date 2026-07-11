@@ -23,6 +23,21 @@ concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: true
 jobs:
+  # Integration tests: run cli.ts against local file:// wiki remotes and
+  # verify the exact resulting wiki contents (adds, deletes, nested syncs,
+  # initial setup, preprocessing). Uses the same Deno version that cliw pins.
+  test-cli:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.8.3
+      - run: deno test -A tests/cli.test.ts
   test-action-clone-dry-run:
     strategy:
       fail-fast: false
@@ -30,7 +45,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./
         with:
           strategy: clone
@@ -42,7 +57,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./
         with:
           strategy: init
@@ -55,7 +70,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./
         with:
           strategy: clone
@@ -69,17 +84,35 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./
         with:
           strategy: init
           dry-run: true
           disable-empty-commits: true
   test-action-real:
+    # Pushes to this repository's actual wiki, then clones it back and
+    # verifies the pushed contents match the wiki/ source directory.
+    # Skipped for fork PRs, which have a read-only token.
+    if: >-
+      github.event_name == 'push' ||
+      github.event.pull_request.head.repo.full_name == github.repository
     concurrency: ${{ github.workflow }}-real
     permissions:
       contents: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./
+      - name: Verify pushed wiki contents
+        run: |
+          set -eux
+          git clone "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.wiki.git" /tmp/wiki-verify
+          # README.md is renamed to Home.md by the preprocess step; every
+          # other file must match the wiki/ source tree exactly by name.
+          diff \
+            <(cd wiki && find . -type f | sed 's|^\./||; s|^README\.md$|Home.md|' | sort) \
+            <(cd /tmp/wiki-verify && find . -name .git -prune -o -type f -print | sed 's|^\./||' | sort)
+          test -s /tmp/wiki-verify/Home.md
+        env:
+          GH_TOKEN: ${{ github.token }}

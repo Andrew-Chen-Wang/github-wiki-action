@@ -14,7 +14,7 @@ import { existsSync } from "node:fs";
 import { copy } from "npm:fs-extra@^11.1.1";
 import * as core from "npm:@actions/core@^1.10.0";
 import { temporaryDirectory } from "npm:tempy@^3.1.0";
-import { $ } from "npm:zx@^7.2.2";
+import { $, cd } from "npm:zx@^7.2.2";
 import { remark } from "npm:remark@^14.0.3";
 import { visit } from "npm:unist-util-visit@^5.0.0";
 import { basename, resolve } from "node:path";
@@ -41,7 +41,12 @@ const repo = core.getInput("repository");
 const wikiGitURL = `${serverURL}/${repo}.wiki.git`;
 const workspacePath = process.cwd();
 const d = temporaryDirectory();
-process.chdir(d);
+// zx's cd() instead of process.chdir(): zx >=7.2 keeps process.cwd() pinned
+// to its own snapshot via an AsyncHook, silently reverting a bare
+// process.chdir() after every `await $` (see issue #90). cd() updates that
+// snapshot. All fs calls below still use paths anchored at `d` so nothing
+// depends on the process cwd.
+cd(d);
 $.cwd = d;
 
 process.env.GH_TOKEN = core.getInput("token");
@@ -49,7 +54,7 @@ process.env.GH_HOST = new URL(core.getInput("github_server_url")).host;
 await $`gh auth setup-git`;
 
 if (core.getInput("strategy") === "clone") {
-  await $`git config --global --add safe.directory ${process.cwd()}`;
+  await $`git config --global --add safe.directory ${d}`;
   await $`git clone ${wikiGitURL} .`;
 } else if (core.getInput("strategy") === "init") {
   await $`git init -b master`;
@@ -65,7 +70,7 @@ await $`git config user.email 41898282+github-actions[bot]@users.noreply.github.
 await $`git config --global user.name github-actions[bot]`;
 await $`git config --global user.email 41898282+github-actions[bot]@users.noreply.github.com`;
 
-await appendFile(".git/info/exclude", core.getInput("ignore"));
+await appendFile(resolve(d, ".git/info/exclude"), core.getInput("ignore"));
 
 // Remove all files/dirs (except .git) from the wiki clone so that files
 // deleted from the source wiki directory are also removed in the wiki repo.
@@ -77,7 +82,7 @@ await Promise.all(
 
 await copy(
   resolve(workspacePath, core.getInput("path")),
-  process.cwd(),
+  d,
   {
     filter: (src) => {
       return basename(src) !== ".git";
@@ -87,8 +92,8 @@ await copy(
 
 if (core.getBooleanInput("preprocess")) {
   // https://github.com/nodejs/node/issues/39960
-  if (existsSync("README.md")) {
-    await rename("README.md", "Home.md");
+  if (existsSync(resolve(d, "README.md"))) {
+    await rename(resolve(d, "README.md"), resolve(d, "Home.md"));
     console.log("Moved README.md to Home.md");
   }
 
@@ -113,14 +118,14 @@ if (core.getBooleanInput("preprocess")) {
 
       console.log(`Rewrote ${x} to ${node.url}`);
     });
-  for (const file of await readdir($.cwd!)) {
+  for (const file of await readdir(d)) {
     if (!mdRe.test(file)) {
       continue;
     }
 
-    let md = await readFile(file, "utf-8");
+    let md = await readFile(resolve(d, file), "utf-8");
     md = (await remark().use(plugin).process(md)).toString();
-    await writeFile(file, md);
+    await writeFile(resolve(d, file), md);
   }
 }
 
