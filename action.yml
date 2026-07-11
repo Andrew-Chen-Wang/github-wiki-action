@@ -82,9 +82,10 @@ inputs:
       to Home.md as well as rewriting links to wiki pages (in any markup format
       GitHub renders, like .md, .rst, or .adoc) to be bare links. Relative
       links that point to other files in your repository (like a script or
-      source file) are rewritten to full blob view URLs, mirroring how GitHub
-      renders in-repo Markdown. This helps ensure that the Markdown works in
-      source control as well as the wiki. The default is true.
+      source file) are rewritten to full blob view URLs (raw URLs for images),
+      mirroring how GitHub renders in-repo Markdown. This helps ensure that
+      the Markdown works in source control as well as the wiki. The default
+      is true.
     required: true
     default: true
   disable-empty-commits:

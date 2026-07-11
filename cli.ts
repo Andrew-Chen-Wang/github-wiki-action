@@ -17,7 +17,7 @@ import { temporaryDirectory } from "npm:tempy@^3.1.0";
 import { $, cd } from "npm:zx@^7.2.2";
 import { remark } from "npm:remark@^14.0.3";
 import { visit } from "npm:unist-util-visit@^5.0.0";
-import { basename, join, relative, resolve, sep } from "node:path";
+import { basename, dirname, join, relative, resolve, sep } from "node:path";
 
 core.startGroup("process.env");
 // The runner masks registered secrets in logs, but don't rely on it —
@@ -100,25 +100,54 @@ const decodePath = (path: string): string | undefined => {
 const contains = (parent: string, child: string) =>
   child === parent || child.startsWith(parent + sep);
 
-// Rewrites link URLs in every top-level Markdown file in dir. rewrite()
-// returns the new URL, or undefined to leave the link untouched.
+// Every file under dir except the .git folder, sorted shallowest-first.
+async function allFiles(dir: string): Promise<string[]> {
+  const out: string[] = [];
+  for (const entry of await readdir(dir, { withFileTypes: true })) {
+    if (entry.name === ".git") continue;
+    const path = resolve(dir, entry.name);
+    if (entry.isDirectory()) out.push(...(await allFiles(path)));
+    else out.push(path);
+  }
+  return out.sort((a, b) =>
+    a.split(sep).length - b.split(sep).length || (a < b ? -1 : 1)
+  );
+}
+
+// Rewrites link, image, and reference-definition URLs in every Markdown file
+// under dir. rewrite() gets the URL, the directory of the file it appears
+// in, and whether it renders as an image; it returns the new URL, or
+// undefined to leave it untouched.
 async function rewriteLinks(
   dir: string,
-  rewrite: (url: string) => string | undefined,
+  rewrite: (
+    url: string,
+    fileDir: string,
+    isImage: boolean,
+  ) => string | undefined,
 ) {
-  const plugin = () => (tree: any) =>
-    visit(tree, ["link", "linkReference"], (node: any) => {
-      if (typeof node.url !== "string" || !isPathOnly(node.url)) return;
-      const rewritten = rewrite(node.url);
-      if (rewritten == null || rewritten === node.url) return;
-      console.log(`Rewrote ${node.url} to ${rewritten}`);
-      node.url = rewritten;
-    });
-  for (const file of await readdir(dir)) {
-    if (!markdownExtRe.test(file)) continue;
-    const path = resolve(dir, file);
-    const md = await readFile(path, "utf-8");
-    await writeFile(path, (await remark().use(plugin).process(md)).toString());
+  for (const file of await allFiles(dir)) {
+    if (!markdownExtRe.test(basename(file))) continue;
+    const fileDir = dirname(file);
+    const plugin = () => (tree: any) => {
+      // A definition backs both link and image references; classify each by
+      // how it's actually referenced.
+      const imageDefs = new Set<string>();
+      visit(tree, "imageReference", (node: any) => {
+        imageDefs.add(node.identifier);
+      });
+      visit(tree, ["link", "image", "definition"], (node: any) => {
+        if (typeof node.url !== "string" || !isPathOnly(node.url)) return;
+        const isImage = node.type === "image" ||
+          (node.type === "definition" && imageDefs.has(node.identifier));
+        const rewritten = rewrite(node.url, fileDir, isImage);
+        if (rewritten == null || rewritten === node.url) return;
+        console.log(`Rewrote ${node.url} to ${rewritten}`);
+        node.url = rewritten;
+      });
+    };
+    const md = await readFile(file, "utf-8");
+    await writeFile(file, (await remark().use(plugin).process(md)).toString());
   }
 }
 
@@ -136,19 +165,42 @@ if (direction === "pull") {
     // README.md page (wikis synced without preprocess can have both).
     const renameHome = existsSync(resolve(d, "Home.md")) &&
       !existsSync(resolve(d, "README.md"));
-    await rewriteLinks(d, (url) => {
+    // The wiki serves pages flat by basename, so a link's textual path may
+    // not point at the page's real location. Index page name -> file
+    // (shallowest file wins a name collision).
+    const pageIndex = new Map<string, string>();
+    for (const file of await allFiles(d)) {
+      const name = basename(file);
+      if (!pageExtRe.test(name)) continue;
+      const page = name.replace(pageExtRe, "");
+      if (!pageIndex.has(page)) pageIndex.set(page, file);
+    }
+    const relativeTo = (fileDir: string, file: string) =>
+      relative(fileDir, file).split(sep).join("/");
+
+    await rewriteLinks(d, (url, fileDir, isImage) => {
+      if (isImage) return;
       const [path, suffix] = splitPath(url);
       if (!path || path.startsWith("/") || pageExtRe.test(path)) return;
       const decoded = decodePath(path);
       if (decoded === undefined) return;
-      const target = resolve(d, decoded);
+      const target = resolve(fileDir, decoded);
       if (!contains(d, target)) return;
-      if (renameHome && target === resolve(d, "Home")) {
-        return path.replace(/Home$/, "README") + ".md" + suffix;
+      if (renameHome && basename(decoded) === "Home") {
+        // Home.md is about to become README.md.
+        if (target === resolve(d, "Home")) {
+          return path.replace(/Home$/, "README") + ".md" + suffix;
+        }
+        return relativeTo(fileDir, resolve(d, "README.md")) + suffix;
       }
+      // The textual path already points at the page's directory...
       for (const ext of pageExts) {
         if (existsSync(`${target}.${ext}`)) return `${path}.${ext}${suffix}`;
       }
+      // ...otherwise it's a flat wiki-namespace link: point at the page's
+      // actual file.
+      const file = pageIndex.get(basename(decoded));
+      if (file !== undefined) return relativeTo(fileDir, file) + suffix;
       return;
     });
 
@@ -235,34 +287,48 @@ if (core.getBooleanInput("preprocess")) {
   const readmeIsHome = existsSync(resolve(sourceDir, "README.md")) &&
     !existsSync(resolve(sourceDir, "Home.md"));
   // Links to source files point at the repo the workflow checked out, which
-  // is not necessarily the wiki's repo (cross-repo publishing).
-  const blobBase = `${process.env.GITHUB_SERVER_URL || serverURL}/${
+  // is not necessarily the wiki's repo (cross-repo publishing). Images need
+  // the raw file (a blob page doesn't render inside <img>); the /raw/ route
+  // works on github.com and GitHub Enterprise alike.
+  const sourceRepoBase = `${process.env.GITHUB_SERVER_URL || serverURL}/${
     process.env.GITHUB_REPOSITORY || repo
-  }/blob/${process.env.GITHUB_SHA || "HEAD"}`;
+  }`;
+  const sourceRef = process.env.GITHUB_SHA || "HEAD";
 
-  await rewriteLinks(d, (url) => {
+  await rewriteLinks(d, (url, fileDir, isImage) => {
     const [path, suffix] = splitPath(url);
     if (!path) return;
     const decoded = decodePath(path);
     if (decoded === undefined) return;
-    // GitHub's repo Markdown view resolves plain relative paths against the
-    // file's directory and /-prefixed paths against the repo root.
+    // fileDir is inside the wiki copy; resolve links against the matching
+    // directory of the source tree, the way GitHub's repo Markdown view
+    // resolves them (/-prefixed paths resolve against the repo root).
+    const sourceFileDir = resolve(sourceDir, relative(d, fileDir));
     const target = path.startsWith("/")
       ? join(workspacePath, decoded)
-      : resolve(sourceDir, decoded);
+      : resolve(sourceFileDir, decoded);
     if (contains(sourceDir, target)) {
-      // Links between wiki pages become bare page links (issue #8).
-      if (!pageExtRe.test(decoded)) return;
+      // Images and other assets ship with the wiki; only page links need to
+      // become bare page links (issue #8).
+      if (isImage || !pageExtRe.test(decoded)) return;
       if (readmeIsHome && target === resolve(sourceDir, "README.md")) {
         return "Home" + suffix;
       }
-      return path.replace(pageExtRe, "") + suffix;
+      // The wiki serves pages flat by basename. A same-directory link keeps
+      // its textual form; anything else must link by page name.
+      if (dirname(target) === sourceFileDir) {
+        return path.replace(pageExtRe, "") + suffix;
+      }
+      return basename(target).replace(pageExtRe, "") + suffix;
     }
-    // Links to other files in the repository become blob view URLs, the same
-    // transformation GitHub applies when rendering in-repo Markdown (#78).
+    // Links to other files in the repository become blob view URLs (or raw
+    // URLs for images), the same transformation GitHub applies when
+    // rendering in-repo Markdown (#78).
     if (contains(workspacePath, target) && existsSync(target)) {
       const parts = relative(workspacePath, target).split(sep);
-      return `${blobBase}/${parts.map(encodeURIComponent).join("/")}${suffix}`;
+      return `${sourceRepoBase}/${isImage ? "raw" : "blob"}/${sourceRef}/${
+        parts.map(encodeURIComponent).join("/")
+      }${suffix}`;
     }
     return;
   });

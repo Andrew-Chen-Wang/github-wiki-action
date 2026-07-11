@@ -127,22 +127,27 @@ is specific to GitHub wikis.
   `.adoc`, ...) are recognized, though only Markdown files are parsed for
   links. Relative links that point at other files in your repository (a script,
   a source file, a Markdown file outside the wiki folder) are rewritten to full
-  `blob/` view URLs pinned to the pushed commit, the same way GitHub resolves
-  them when rendering in-repo Markdown. This helps ensure that the Markdown
-  works in source control as well as the wiki. The default is true.
+  `blob/` view URLs (`raw/` URLs for images) pinned to the pushed commit, the
+  same way GitHub resolves them when rendering in-repo Markdown. This helps
+  ensure that the Markdown works in source control as well as the wiki. The
+  default is true. See [`preprocess:` notes](#preprocess-notes).
 
 - **`disable-empty-commits`:** By default, any triggering of this action will
   result in a commit to the Wiki, even if that commit is empty.
   If this option is true, a workflow run which would result in no changes
   to the Wiki files, will no longer create an empty commit. The default is false.
 
-#### `preprocess:` limitations
+#### `preprocess:` notes
 
-- Only Markdown pages at the top level of the `path` folder have their links
-  rewritten; pages in subdirectories and non-Markdown pages are synced
-  verbatim.
-- Inline links are rewritten; reference-style link definitions
-  (`[label]: ./page.md`) and image links are not.
+- Only Markdown pages are parsed for links; pages in other formats (`.rst`,
+  `.adoc`, ...) are synced verbatim but still recognized as link targets.
+- GitHub serves wiki pages flat by basename, so cross-directory page links
+  are rewritten to bare page names, while same-directory links keep their
+  form. Reference-style definitions (`[label]: ./page.md`) are rewritten
+  like the links or images that use them.
+- Images pointing at repository files become `raw/` URLs (a `blob/` page
+  would not render inside an image); images shipped inside the wiki folder
+  stay relative.
 - A page whose name itself ends in a renderable extension (say a page called
   `example.org`) is treated as a file link rather than a page link.
 

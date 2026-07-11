@@ -56,6 +56,7 @@ const SOURCE_ENV = {
   GITHUB_SHA: "cafebabe",
 };
 const BLOB_BASE = `${SOURCE_ENV.GITHUB_SERVER_URL}/${SOURCE_ENV.GITHUB_REPOSITORY}/blob/${SOURCE_ENV.GITHUB_SHA}`;
+const RAW_BASE = `${SOURCE_ENV.GITHUB_SERVER_URL}/${SOURCE_ENV.GITHUB_REPOSITORY}/raw/${SOURCE_ENV.GITHUB_SHA}`;
 
 async function runScenario(scenario: Scenario): Promise<void> {
   const root = await Deno.makeTempDir({ prefix: "wiki-action-test-" });
@@ -373,6 +374,56 @@ Deno.test("preprocess rewrites repo file links to blob URLs (#78)", () =>
     },
   }));
 
+// Pages in subdirectories are preprocessed too. The wiki serves pages flat
+// by basename, so cross-directory page links become bare page names while
+// same-directory links keep their textual form. Images pointing at repo
+// files become raw URLs (a blob page doesn't render inside <img>), images
+// shipping with the wiki stay relative, and reference-style definitions are
+// rewritten according to how they're referenced.
+Deno.test("preprocess rewrites subdirectory pages, images, and definitions", () =>
+  runScenario({
+    preprocess: true,
+    remote: { "Home.md": "old" },
+    workspaceFiles: {
+      "assets/logo.png": "png bytes",
+      "scripts/run.sh": "#!/bin/sh",
+    },
+    workspaceWiki: {
+      "Home.md": [
+        "![repo image](../assets/logo.png)",
+        "![wiki image](img/local.png)",
+        "[ref link][1]",
+        "![ref image][2]",
+        "[1]: ../scripts/run.sh",
+        "[2]: ../assets/logo.png",
+      ].join("\n\n") + "\n",
+      "img/local.png": "png",
+      "docs/Guide.md": [
+        "[same dir](./Extra.md)",
+        "[root page](../Home.md#top)",
+        "[script](../../scripts/run.sh)",
+      ].join("\n\n") + "\n",
+      "docs/Extra.md": "extra",
+    },
+    expect: {
+      "Home.md": [
+        `![repo image](${RAW_BASE}/assets/logo.png)`,
+        "![wiki image](img/local.png)",
+        "[ref link][1]",
+        "![ref image][2]",
+        `[1]: ${BLOB_BASE}/scripts/run.sh`,
+        `[2]: ${RAW_BASE}/assets/logo.png`,
+      ].join("\n\n"),
+      "img/local.png": "png",
+      "docs/Guide.md": [
+        "[same dir](./Extra)",
+        "[root page](Home#top)",
+        `[script](${BLOB_BASE}/scripts/run.sh)`,
+      ].join("\n\n"),
+      "docs/Extra.md": "extra",
+    },
+  }));
+
 // GitHub wikis render more than Markdown (AsciiDoc, reStructuredText, ...).
 // Links from Markdown pages to pages in any supported format must be
 // bare-linked, while the non-Markdown files themselves are synced verbatim —
@@ -574,6 +625,24 @@ Deno.test("pull: restores the extension pages actually have, not just .md", () =
       "README.md": "[guide](./Guide.rst)\n\n[usage](./Usage.md#intro)",
       "Guide.rst": "Title\n=====\n\n*rst stuff*",
       "Usage.md": "usage",
+    },
+  }));
+
+// The wiki serves pages flat by basename, so a wiki-authored link may not
+// point at the page's real location on disk. The pull restores the actual
+// file path relative to the linking page.
+Deno.test("pull: restores file paths for flat wiki links from subdirectory pages", () =>
+  runPullScenario({
+    remote: {
+      "Home.md": "[guide](guide-page)\n",
+      "docs/guide-page.md": "[back home](Home)\n\n[sibling](./other)\n",
+      "docs/other.md": "other\n",
+    },
+    workspaceWiki: {},
+    expect: {
+      "README.md": "[guide](docs/guide-page.md)",
+      "docs/guide-page.md": "[back home](../README.md)\n\n[sibling](./other.md)",
+      "docs/other.md": "other",
     },
   }));
 
