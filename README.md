@@ -78,6 +78,15 @@ is specific to GitHub wikis.
 
 ### Inputs
 
+- **`direction`:** Select from `push` or `pull`. `push` (the default) syncs the
+  `path` folder to the GitHub wiki. `pull` does the reverse: it clones the
+  wiki, converts the pages back into source-friendly Markdown (`Home.md`
+  becomes `README.md` and bare wiki page links get their `.md` extension back),
+  and mirrors them into the `path` folder of your workspace. Nothing is
+  committed or pushed to your repository in pull mode; pair it with a
+  PR-creating action like [create-pull-request]. See
+  [Pulling wiki edits back](#pulling-wiki-edits-back) below.
+
 - **`strategy`:** Select from `clone` or `init` to determine which method to use
   to push changes to the GitHub wiki. `clone` will clone the `.wiki.git` repo
   and add an additional commit. `init` will create a new repo with a single
@@ -113,8 +122,11 @@ is specific to GitHub wikis.
 
 - **`preprocess`:** If this option is true, we will preprocess the wiki to move
   the `README.md` to `Home.md` as well as rewriting all `.md` links to be bare
-  links. This helps ensure that the Markdown works in source control as well as
-  the wiki. The default is true.
+  links. Relative links that point at other files in your repository (a script,
+  a source file, a Markdown file outside the wiki folder) are rewritten to full
+  `blob/` view URLs pinned to the pushed commit, the same way GitHub resolves
+  them when rendering in-repo Markdown. This helps ensure that the Markdown
+  works in source control as well as the wiki. The default is true.
 
 - **`disable-empty-commits`:** By default, any triggering of this action will
   result in a commit to the Wiki, even if that commit is empty.
@@ -142,6 +154,39 @@ than the default `strategy: clone`.
 - **`wiki_url`:** The HTTP URL that points to the deployed repository's wiki
   tab. This is essentially the concatenation of `${{ github.server_url }}`,
   `${{ github.repository }}`, and the `/wiki` page.
+
+### Pulling wiki edits back
+
+If someone edits a page in the wiki UI, those edits normally get overwritten by
+the next push from your `wiki/` folder. `direction: pull` lets you sync them
+back into your source tree instead. It clones the wiki, applies the inverse of
+the `preprocess` transformations (`Home.md` ➡ `README.md`, `./page` ➡
+`./page.md`), and updates the `path` folder in your workspace. It never
+commits or pushes to your repository, so combine it with something like
+[create-pull-request] to open a docs PR:
+
+```yml
+name: Pull wiki
+on:
+  gollum: # Runs whenever a wiki page is created or edited
+  workflow_dispatch:
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  pull-wiki:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Andrew-Chen-Wang/github-wiki-action@v4
+        with:
+          direction: pull
+      - uses: peter-evans/create-pull-request@v6
+        with:
+          branch: sync-wiki
+          title: Sync wiki edits back into wiki/
+          commit-message: Sync wiki edits back into wiki/
+```
 
 ### Cross-repo wikis
 
@@ -195,6 +240,7 @@ between your IDE and the PR, but it's the easiest way to test the action.
 
 <!-- prettier-ignore-start -->
 [Decathlon/wiki-page-creator-action#11]: https://github.com/Decathlon/wiki-page-creator-action/issues/11
+[create-pull-request]: https://github.com/peter-evans/create-pull-request
 [supported markup languages]: https://github.com/github/markup#markups
 [PAT]: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
 <!-- prettier-ignore-end -->

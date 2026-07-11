@@ -42,10 +42,20 @@ interface Scenario {
   remote: Record<string, string> | "empty";
   /** Contents of the workspace's wiki/ source directory. */
   workspaceWiki: Record<string, string>;
+  /** Extra workspace files outside the wiki/ source directory. */
+  workspaceFiles?: Record<string, string>;
   /** Exact expected wiki repo contents after the action runs. */
   expect: Record<string, string>;
   preprocess?: boolean;
 }
+
+// Fixed "checked out repo" identity so blob URLs in expectations are static.
+const SOURCE_ENV = {
+  GITHUB_SERVER_URL: "https://github.test",
+  GITHUB_REPOSITORY: "octo/source",
+  GITHUB_SHA: "cafebabe",
+};
+const BLOB_BASE = `${SOURCE_ENV.GITHUB_SERVER_URL}/${SOURCE_ENV.GITHUB_REPOSITORY}/blob/${SOURCE_ENV.GITHUB_SHA}`;
 
 async function runScenario(scenario: Scenario): Promise<void> {
   const root = await Deno.makeTempDir({ prefix: "wiki-action-test-" });
@@ -77,6 +87,7 @@ async function runScenario(scenario: Scenario): Promise<void> {
     const workspace = join(root, "workspace");
     await Deno.mkdir(join(workspace, "wiki"), { recursive: true });
     await writeFiles(join(workspace, "wiki"), scenario.workspaceWiki);
+    await writeFiles(workspace, scenario.workspaceFiles ?? {});
     await git(workspace, "init", "-q", "-b", "main");
     await git(workspace, "add", "-A");
     await git(
@@ -108,6 +119,7 @@ async function runScenario(scenario: Scenario): Promise<void> {
     env.HOME = home;
     env.USERPROFILE = home;
     env.XDG_CONFIG_HOME = join(home, ".config");
+    Object.assign(env, SOURCE_ENV);
     env.INPUT_STRATEGY = scenario.strategy ?? "clone";
     env.INPUT_REPOSITORY = REPO;
     env.INPUT_GITHUB_SERVER_URL = pathToFileURL(join(root, "remote")).href;
@@ -156,7 +168,14 @@ async function runScenario(scenario: Scenario): Promise<void> {
     const workspaceEntries = [...Deno.readDirSync(workspace)]
       .map((e) => e.name)
       .sort();
-    assertEquals(workspaceEntries, [".git", "wiki"]);
+    const expectedEntries = [
+      ...new Set([
+        ".git",
+        "wiki",
+        ...Object.keys(scenario.workspaceFiles ?? {}).map((f) => f.split("/")[0]),
+      ]),
+    ].sort();
+    assertEquals(workspaceEntries, expectedEntries);
   } finally {
     await Deno.remove(root, { recursive: true }).catch(() => {});
   }
@@ -289,5 +308,231 @@ Deno.test("preprocess renames README.md to Home.md and rewrites .md links", () =
     expect: {
       "Home.md": "# Title\n\n[Usage](Usage)",
       "Usage.md": "usage",
+    },
+  }));
+
+// Issue #78: relative links that point at real files in the checked-out
+// repository (outside the wiki source dir) become blob view URLs, mirroring
+// how GitHub renders in-repo Markdown. Everything else is left alone.
+Deno.test("preprocess rewrites repo file links to blob URLs (#78)", () =>
+  runScenario({
+    preprocess: true,
+    remote: { "Home.md": "old" },
+    workspaceFiles: {
+      "scripts/update.sh": "#!/bin/sh",
+      "CONTRIBUTING.md": "how to contribute",
+      "docs & files/read me.txt": "spaces",
+    },
+    workspaceWiki: {
+      "README.md": [
+        "[script](../scripts/update.sh)",
+        "[script with anchor](../scripts/update.sh#L1)",
+        "[root relative](/scripts/update.sh)",
+        "[repo markdown](../CONTRIBUTING.md)",
+        "[encoded](../docs%20&%20files/read%20me.txt)",
+        "[missing](../scripts/nope.sh)",
+        "[external](https://example.com/script.sh)",
+        "[page](./Usage.md#anchor)",
+        "[asset](./diagram.png)",
+      ].join("\n\n") + "\n",
+      "Usage.md": "usage",
+      "diagram.png": "not really a png",
+    },
+    expect: {
+      "Home.md": [
+        `[script](${BLOB_BASE}/scripts/update.sh)`,
+        `[script with anchor](${BLOB_BASE}/scripts/update.sh#L1)`,
+        `[root relative](${BLOB_BASE}/scripts/update.sh)`,
+        `[repo markdown](${BLOB_BASE}/CONTRIBUTING.md)`,
+        `[encoded](${BLOB_BASE}/docs%20%26%20files/read%20me.txt)`,
+        "[missing](../scripts/nope.sh)",
+        "[external](https://example.com/script.sh)",
+        "[page](./Usage#anchor)",
+        "[asset](./diagram.png)",
+      ].join("\n\n"),
+      "Usage.md": "usage",
+      "diagram.png": "not really a png",
+    },
+  }));
+
+// ---------------------------------------------------------------------------
+// direction: pull (issue #67) — wiki -> workspace sync with the inverse
+// preprocess transforms.
+// ---------------------------------------------------------------------------
+
+interface PullScenario {
+  /** Pre-existing wiki contents. */
+  remote: Record<string, string>;
+  /** Pre-existing contents of the workspace's wiki/ directory. */
+  workspaceWiki: Record<string, string>;
+  /** Exact expected workspace wiki/ contents after the action runs. */
+  expect: Record<string, string>;
+  preprocess?: boolean;
+  dryRun?: boolean;
+}
+
+async function runPullScenario(scenario: PullScenario): Promise<void> {
+  const root = await Deno.makeTempDir({ prefix: "wiki-action-test-" });
+  try {
+    const bare = join(root, "remote", ...`${REPO}.wiki.git`.split("/"));
+    await Deno.mkdir(bare, { recursive: true });
+    await git(bare, "init", "--bare", "-q");
+    await git(bare, "symbolic-ref", "HEAD", "refs/heads/master");
+    const seed = join(root, "seed");
+    await Deno.mkdir(seed);
+    await git(seed, "init", "-q", "-b", "master");
+    await writeFiles(seed, scenario.remote);
+    await git(seed, "add", "-A");
+    await git(
+      seed,
+      "-c", "user.email=seed@example.com",
+      "-c", "user.name=seed",
+      "commit", "-qm", "existing wiki content",
+    );
+    await git(seed, "push", "-q", bare, "master");
+
+    const workspace = join(root, "workspace");
+    await Deno.mkdir(join(workspace, "wiki"), { recursive: true });
+    await writeFiles(join(workspace, "wiki"), scenario.workspaceWiki);
+    await git(workspace, "init", "-q", "-b", "main");
+    await git(workspace, "add", "-A");
+    await git(
+      workspace,
+      "-c", "user.email=ws@example.com",
+      "-c", "user.name=ws",
+      "commit", "-qm", "workspace", "--allow-empty",
+    );
+
+    const bin = join(root, "bin");
+    await Deno.mkdir(bin);
+    await Deno.writeTextFile(join(bin, "gh"), "#!/bin/sh\nexit 0\n");
+    if (Deno.build.os === "windows") {
+      await Deno.writeTextFile(join(bin, "gh.cmd"), "@echo off\r\nexit /b 0\r\n");
+    } else {
+      await Deno.chmod(join(bin, "gh"), 0o755);
+    }
+
+    const home = join(root, "home");
+    await Deno.mkdir(home);
+
+    const env: Record<string, string> = { ...Deno.env.toObject() };
+    for (const key of Object.keys(env)) {
+      if (key.toUpperCase() === "PATH") delete env[key];
+    }
+    env.PATH = bin + delimiter + (Deno.env.get("PATH") ?? "");
+    env.HOME = home;
+    env.USERPROFILE = home;
+    env.XDG_CONFIG_HOME = join(home, ".config");
+    env.INPUT_DIRECTION = "pull";
+    env.INPUT_STRATEGY = "clone";
+    env.INPUT_REPOSITORY = REPO;
+    env.INPUT_GITHUB_SERVER_URL = pathToFileURL(join(root, "remote")).href;
+    env.INPUT_TOKEN = "test-token";
+    env.INPUT_PATH = "wiki";
+    env.INPUT_COMMIT_MESSAGE = "test commit";
+    env.INPUT_IGNORE = "";
+    env.INPUT_DRY_RUN = String(scenario.dryRun ?? false);
+    env.INPUT_PREPROCESS = String(scenario.preprocess ?? true);
+    env.INPUT_DISABLE_EMPTY_COMMITS = "false";
+
+    const out = await new Deno.Command(Deno.execPath(), {
+      args: ["run", "-A", CLI_PATH],
+      cwd: workspace,
+      env,
+      clearEnv: true,
+      stdout: "piped",
+      stderr: "piped",
+    }).output();
+    if (!out.success) {
+      throw new Error(
+        "cli.ts failed\n--- stdout ---\n" +
+          new TextDecoder().decode(out.stdout) +
+          "\n--- stderr ---\n" +
+          new TextDecoder().decode(out.stderr),
+      );
+    }
+
+    // The workspace wiki/ dir must now contain exactly the expected files.
+    const files: string[] = [];
+    const walk = (dir: string, prefix: string) => {
+      for (const entry of Deno.readDirSync(dir)) {
+        if (entry.name === ".git") continue;
+        if (entry.isDirectory) walk(join(dir, entry.name), `${prefix}${entry.name}/`);
+        else files.push(`${prefix}${entry.name}`);
+      }
+    };
+    walk(join(workspace, "wiki"), "");
+    assertEquals(files.sort(), Object.keys(scenario.expect).sort());
+    for (const [path, content] of Object.entries(scenario.expect)) {
+      assertEquals(
+        (await Deno.readTextFile(join(workspace, "wiki", ...path.split("/")))).trim(),
+        content.trim(),
+        `content mismatch for ${path}`,
+      );
+    }
+
+    // Pull mode must never push anything to the wiki remote.
+    assertEquals(
+      await git(bare, "log", "--format=%s", "master"),
+      "existing wiki content",
+    );
+  } finally {
+    await Deno.remove(root, { recursive: true }).catch(() => {});
+  }
+}
+
+Deno.test("pull: mirrors the wiki into the workspace with inverse preprocess (#67)", () =>
+  runPullScenario({
+    remote: {
+      "Home.md": [
+        "[another page](./another-page)",
+        "[with anchor](./another-page#section)",
+        "[home](./Home)",
+        "[external](https://example.com/page)",
+        "[missing](./no-such-page)",
+      ].join("\n\n") + "\n",
+      "another-page.md": "another page\n",
+    },
+    workspaceWiki: {
+      "README.md": "stale readme\n",
+      "Stale-Page.md": "deleted from the wiki\n",
+    },
+    expect: {
+      "README.md": [
+        "[another page](./another-page.md)",
+        "[with anchor](./another-page.md#section)",
+        "[home](./README.md)",
+        "[external](https://example.com/page)",
+        "[missing](./no-such-page)",
+      ].join("\n\n"),
+      "another-page.md": "another page",
+    },
+  }));
+
+Deno.test("pull: preprocess=false copies the wiki verbatim", () =>
+  runPullScenario({
+    preprocess: false,
+    remote: {
+      "Home.md": "[another page](./another-page)\n",
+      "another-page.md": "another page\n",
+    },
+    workspaceWiki: {},
+    expect: {
+      "Home.md": "[another page](./another-page)",
+      "another-page.md": "another page",
+    },
+  }));
+
+Deno.test("pull: dry run leaves the workspace untouched", () =>
+  runPullScenario({
+    dryRun: true,
+    remote: {
+      "Home.md": "new wiki home\n",
+    },
+    workspaceWiki: {
+      "README.md": "original readme\n",
+    },
+    expect: {
+      "README.md": "original readme",
     },
   }));

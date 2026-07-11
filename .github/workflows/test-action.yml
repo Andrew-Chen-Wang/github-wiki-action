@@ -90,6 +90,29 @@ jobs:
           strategy: init
           dry-run: true
           disable-empty-commits: true
+  test-action-pull:
+    # Pulls the repository's actual wiki back into the workspace (writes only
+    # to the runner's checkout; nothing is committed or pushed anywhere).
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./
+        with:
+          direction: pull
+      - name: Verify pulled wiki contents
+        shell: bash
+        run: |
+          set -eux
+          # The push preprocess renames README.md to Home.md; the pull must
+          # invert it.
+          test -s wiki/README.md
+          test ! -f wiki/Home.md
+          # Bare wiki page links must get their .md extension back.
+          grep -F "(./another-page.md)" wiki/README.md
   test-action-real:
     # Pushes to this repository's actual wiki, then clones it back and
     # verifies the pushed contents match the wiki/ source directory.
